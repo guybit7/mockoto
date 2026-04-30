@@ -20,7 +20,7 @@
             "input": "apps/mockoto-ui/public"
           }
         ],
-        "styles": ["apps/mockoto-ui/src/styles.scss"]
+        "styles": ["apps/mockoto-ui/src/styles.css"]
       },
       "configurations": {
         "production": {
@@ -58,7 +58,7 @@
         }
       },
       "defaultConfiguration": "development",
-      "dependsOn": ["mockoto-be:serve"],
+      // "dependsOn": ["mockoto-be:serve"],
       "options": {
         "proxyConfig": "apps/mockoto-ui/proxy.conf.json"
       }
