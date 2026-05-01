@@ -1,0 +1,83 @@
+<aside class="flex h-full w-64 shrink-0 flex-col border-r border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-900">
+  <!-- Brand -->
+  <div class="flex h-14 items-center border-b border-gray-200 px-4 dark:border-gray-700">
+    <span class="text-lg font-bold tracking-tight text-gray-900 dark:text-white">Mockoto</span>
+  </div>
+
+  <!-- Filter -->
+  <div class="px-3 py-3">
+    <input
+      type="text"
+      placeholder="Filter..."
+      class="w-full rounded-md border border-gray-200 bg-white px-3 py-1.5 text-sm text-gray-900 placeholder-gray-400 outline-none focus:border-blue-500 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100 dark:placeholder-gray-500 dark:focus:border-blue-400"
+    />
+  </div>
+
+  <!-- Navigation -->
+  <nav class="flex-1 space-y-4 overflow-y-auto px-2 py-1">
+    <!-- Projects -->
+    <div>
+      <p class="mb-1 px-2 text-xs font-semibold uppercase tracking-wider text-gray-400 dark:text-gray-500">
+        Projects
+      </p>
+      <a
+        routerLink="/projects"
+        routerLinkActive
+        #rlaProjects="routerLinkActive"
+        [routerLinkActiveOptions]="{ exact: true }"
+        [class]="rlaProjects.isActive
+          ? 'bg-blue-50 text-blue-700 font-medium dark:bg-blue-900/30 dark:text-blue-400'
+          : 'text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800'"
+        class="flex items-center rounded-md px-2 py-1.5 text-sm"
+      >
+        All Projects
+      </a>
+    </div>
+
+    <!-- Sessions — visible when a project is active -->
+    @if (activeRoute.activeProjectId()) {
+      <div>
+        <p class="mb-1 px-2 text-xs font-semibold uppercase tracking-wider text-gray-400 dark:text-gray-500">
+          Sessions
+        </p>
+        <a
+          [routerLink]="['/projects', activeRoute.activeProjectId(), 'sessions']"
+          routerLinkActive
+          #rlaSessions="routerLinkActive"
+          [routerLinkActiveOptions]="{ exact: true }"
+          [class]="rlaSessions.isActive
+            ? 'bg-blue-50 text-blue-700 font-medium dark:bg-blue-900/30 dark:text-blue-400'
+            : 'text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800'"
+          class="flex items-center rounded-md px-2 py-1.5 text-sm"
+        >
+          All Sessions
+        </a>
+      </div>
+    }
+
+    <!-- Mocks — visible when a session is active -->
+    @if (activeRoute.activeSessionId()) {
+      <div>
+        <p class="mb-1 px-2 text-xs font-semibold uppercase tracking-wider text-gray-400 dark:text-gray-500">
+          Mocks
+        </p>
+        <a
+          [routerLink]="[
+            '/projects', activeRoute.activeProjectId(),
+            'sessions', activeRoute.activeSessionId(),
+            'mocks'
+          ]"
+          routerLinkActive
+          #rlaMocks="routerLinkActive"
+          [routerLinkActiveOptions]="{ exact: true }"
+          [class]="rlaMocks.isActive
+            ? 'bg-blue-50 text-blue-700 font-medium dark:bg-blue-900/30 dark:text-blue-400'
+            : 'text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800'"
+          class="flex items-center rounded-md px-2 py-1.5 text-sm"
+        >
+          All Mocks
+        </a>
+      </div>
+    }
+  </nav>
+</aside>

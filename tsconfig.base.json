@@ -14,7 +14,10 @@
     "skipLibCheck": true,
     "skipDefaultLibCheck": true,
     "baseUrl": ".",
-    "paths": {}
+    "paths": {
+      "@mockoto-ui/core": ["packages/mockoto-ui/core/src/index.ts"],
+      "@mockoto/shared": ["packages/shared/src/index.ts"]
+    }
   },
   "exclude": ["node_modules", "tmp"]
 }

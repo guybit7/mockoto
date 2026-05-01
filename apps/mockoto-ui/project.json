@@ -58,7 +58,7 @@
         }
       },
       "defaultConfiguration": "development",
-      // "dependsOn": ["mockoto-be:serve"],
+      "dependsOn": ["mockoto-be:serve"],
       "options": {
         "proxyConfig": "apps/mockoto-ui/proxy.conf.json"
       }

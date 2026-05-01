@@ -1,14 +1,23 @@
 #!/usr/bin/env node
 import Fastify from 'fastify';
-import { app } from './app/app';
-import open from 'open';
 import fastifyStatic from '@fastify/static';
+import open from 'open';
 import path from 'path';
 import fs from 'fs';
+
+import projectsRoutes from './app/routes/projects';
+import { runMigrations } from './app/db/migrate';
 
 const host = process.env.HOST ?? 'localhost';
 const port = process.env.PORT ? Number(process.env.PORT) : 3000;
 
+// 🔹 detect environment
+const nodeEnv = process.env.NODE_ENV ?? 'production';
+
+const isProd = nodeEnv === 'production';
+
+console.log(new Date().toISOString());
+console.log(isProd);
 // create server
 const server = Fastify({
   logger: true,
@@ -16,8 +25,6 @@ const server = Fastify({
 
 /**
  * Resolve Angular dist path
- * 1. try inside installed package (production / npx)
- * 2. fallback to cwd (dev mode)
  */
 function resolveUiPath() {
   const root = path.resolve(__dirname);
@@ -40,35 +47,39 @@ function resolveUiPath() {
 // resolve UI
 const staticPath = resolveUiPath();
 
-if (!staticPath) {
-  console.error('❌ Angular build not found');
-  console.error('👉 If developing locally: nx build mockoto-ui');
-  process.exit(1);
+// 🔥 serve UI only in production
+if (isProd && staticPath) {
+  server.register(fastifyStatic, {
+    root: staticPath,
+    prefix: '/',
+  });
+
+  // SPA fallback
+  server.setNotFoundHandler((req, reply) => {
+    reply.sendFile('index.html');
+  });
+
+  console.log('🟢 UI enabled (production mode)');
+} else {
+  console.log('🟡 API-only mode (no UI)');
 }
 
-// serve UI
-server.register(fastifyStatic, {
-  root: staticPath,
-  prefix: '/',
-});
-
-// SPA fallback
-server.setNotFoundHandler((req, reply) => {
-  reply.sendFile('index.html');
-});
-
-// API
-server.register(app, { prefix: '/api' });
+// 🔹 API only
+server.register(projectsRoutes, { prefix: '/api' });
 
 // start server
 async function start() {
   try {
+    runMigrations();
     await server.listen({ port, host });
 
     const url = `http://${host}:${port}`;
     console.log(`[ ready ] ${url}`);
 
-    await open(url);
+    // open browser only if UI is enabled
+    if (isProd) {
+      await open(url);
+    }
   } catch (err) {
     server.log.error(err);
     process.exit(1);

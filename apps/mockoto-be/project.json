@@ -13,10 +13,18 @@
         "platform": "node",
         "outputPath": "dist/apps/mockoto-be",
         "format": ["cjs"],
-        "bundle": false,
+        "bundle": true,
+        "externalDependencies": ["better-sqlite3", "fsevents"],
         "main": "apps/mockoto-be/src/main.ts",
         "tsConfig": "apps/mockoto-be/tsconfig.app.json",
-        "assets": ["apps/mockoto-be/src/assets"],
+        "assets": [
+          "apps/mockoto-be/src/assets",
+          {
+            "input": "apps/mockoto-be/drizzle",
+            "glob": "**/*",
+            "output": "drizzle"
+          }
+        ],
         "generatePackageJson": true,
         "esbuildOptions": {
           "sourcemap": true,
@@ -62,10 +70,38 @@
       "dependsOn": ["prune-lockfile", "copy-workspace-modules"],
       "executor": "nx:noop"
     },
+    "db:seed": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "node -r @swc-node/register apps/mockoto-be/src/app/db/seed.ts"
+      }
+    },
+    "db:generate": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "drizzle-kit generate",
+        "cwd": "apps/mockoto-be"
+      }
+    },
+    "db:migrate": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "drizzle-kit migrate",
+        "cwd": "apps/mockoto-be"
+      }
+    },
+    "db:studio": {
+      "continuous": true,
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "drizzle-kit studio",
+        "cwd": "apps/mockoto-be"
+      }
+    },
     "serve": {
       "continuous": true,
       "executor": "@nx/js:node",
-      "defaultConfiguration": "development",
+      "defaultConfiguration": "production",
       "dependsOn": ["build"],
       "options": {
         "buildTarget": "mockoto-be:build",
