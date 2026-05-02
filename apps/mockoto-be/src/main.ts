@@ -7,6 +7,7 @@ import fs from 'fs';
 
 import projectsRoutes from './app/routes/projects';
 import { runMigrations } from './app/db/migrate';
+import { registerRoutes } from './app/routes';
 
 const host = process.env.HOST ?? 'localhost';
 const port = process.env.PORT ? Number(process.env.PORT) : 3000;
@@ -64,13 +65,12 @@ if (isProd && staticPath) {
   console.log('🟡 API-only mode (no UI)');
 }
 
-// 🔹 API only
-server.register(projectsRoutes, { prefix: '/api' });
-
 // start server
 async function start() {
   try {
     runMigrations();
+
+    await registerRoutes(server);
     await server.listen({ port, host });
 
     const url = `http://${host}:${port}`;

@@ -55,3 +55,4 @@ vitest.config.*.timestamp*
 
 /data/*
 .env
+/internal

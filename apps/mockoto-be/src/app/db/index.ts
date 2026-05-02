@@ -5,9 +5,7 @@ import fs from 'fs';
 import * as schema from './schema';
 
 const dbDir = path.join(process.cwd(), 'data');
-if (!fs.existsSync(dbDir)) {
-  fs.mkdirSync(dbDir, { recursive: true });
-}
+fs.mkdirSync(dbDir, { recursive: true });
 
 const sqlite = new Database(path.join(dbDir, 'mockoto.db'));
 

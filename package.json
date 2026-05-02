@@ -3,7 +3,8 @@
   "version": "0.0.3-beta.1",
   "license": "MIT",
   "scripts": {
-    "prepublishOnly": "nx build mockoto-ui && nx build mockoto-be --configuration=production"
+    "prepublishOnly": "nx build mockoto-ui && nx build mockoto-be --configuration=production",
+    "test:e2e": "tsx scripts/e2e-test.ts"
   },
   "bin": {
     "mockoto": "./bin/mockoto.js"
@@ -93,6 +94,7 @@
     "tailwindcss": "^4.2.4",
     "ts-node": "10.9.1",
     "tslib": "^2.3.0",
+    "tsx": "^4.21.0",
     "typescript": "~5.9.2",
     "typescript-eslint": "^8.40.0",
     "vite": "^7.3.2",
