@@ -1,0 +1,13 @@
+{
+  "name": "mockoto-ui-table",
+  "$schema": "../../../node_modules/nx/schemas/project-schema.json",
+  "projectType": "library",
+  "sourceRoot": "packages/mockoto-ui/table/src",
+  "prefix": "mockoto-ui",
+  "tags": ["scope:mockoto-ui", "type:ui"],
+  "targets": {
+    "lint": {
+      "executor": "@nx/eslint:lint"
+    }
+  }
+}

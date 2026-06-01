@@ -6,6 +6,7 @@ export const RuleResponseSchema = z.object({
   ruleId: z.uuid(),
   name: z.string().optional(),
   isActive: z.boolean().default(false),
+  isFavorite: z.boolean().default(false),
   statusCode: z.number().int().min(100).max(599).default(200),
   headers: jsonValue.optional(),
   body: jsonValue.optional(),
@@ -19,6 +20,7 @@ export const CreateRuleResponseSchema = z.object({
   ruleId: z.uuid(),
   name: z.string().optional(),
   isActive: z.boolean().default(false),
+  isFavorite: z.boolean().default(false),
   statusCode: z.number().int().min(100).max(599).default(200),
   headers: jsonValue.optional(),
   body: jsonValue.optional(),
@@ -26,7 +28,16 @@ export const CreateRuleResponseSchema = z.object({
   latency: z.number().int().min(0).optional(),
 });
 
-export const UpdateRuleResponseSchema = CreateRuleResponseSchema.omit({ ruleId: true }).partial();
+export const UpdateRuleResponseSchema = z.object({
+  name:       z.string().optional(),
+  isActive:   z.boolean().optional(),
+  isFavorite: z.boolean().optional(),
+  statusCode: z.number().int().min(100).max(599).optional(),
+  headers:    jsonValue.optional(),
+  body:       jsonValue.optional(),
+  isError:    z.boolean().optional(),
+  latency:    z.number().int().min(0).optional(),
+});
 
 export type RuleResponse = z.infer<typeof RuleResponseSchema>;
 export type CreateRuleResponseDto = z.infer<typeof CreateRuleResponseSchema>;

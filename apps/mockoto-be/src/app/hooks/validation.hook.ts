@@ -1,16 +1,17 @@
 import { FastifyRequest, FastifyReply } from 'fastify';
 import { ZodSchema } from 'zod';
+import { ERROR_CODE } from '@mockoto/shared';
 
 export function validateBody<T>(schema: ZodSchema<T>) {
   return async (req: FastifyRequest, reply: FastifyReply): Promise<void> => {
     const result = schema.safeParse(req.body);
     if (!result.success) {
-      reply.code(400).send({
+      return reply.code(400).send({
+        code:    ERROR_CODE.VALIDATION,
         message: 'Validation failed',
-        errors: result.error.flatten().fieldErrors,
+        details: result.error.issues,
       });
-    } else {
-      req.body = result.data as unknown;
     }
+    req.body = result.data as unknown;
   };
 }

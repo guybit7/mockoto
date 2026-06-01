@@ -1,0 +1,13 @@
+{
+  "name": "mockoto-features-rules",
+  "$schema": "../../../../node_modules/nx/schemas/project-schema.json",
+  "projectType": "library",
+  "sourceRoot": "packages/mockoto-ui/features/rules/src",
+  "prefix": "mockoto",
+  "tags": ["scope:mockoto", "type:feature"],
+  "targets": {
+    "lint": {
+      "executor": "@nx/eslint:lint"
+    }
+  }
+}

@@ -25,16 +25,40 @@ export default [
               onlyDependOnLibsWithTags: ['scope:shared'],
             },
             {
-              sourceTag: 'scope:shop',
-              onlyDependOnLibsWithTags: ['scope:shop', 'scope:shared'],
+              sourceTag: 'scope:backend',
+              onlyDependOnLibsWithTags: ['scope:backend', 'scope:shared'],
             },
             {
-              sourceTag: 'scope:api',
-              onlyDependOnLibsWithTags: ['scope:api', 'scope:shared'],
+              sourceTag: 'scope:mockoto-ui',
+              onlyDependOnLibsWithTags: ['scope:mockoto-ui', 'scope:mockoto', 'scope:shared'],
             },
             {
-              sourceTag: 'type:data',
-              onlyDependOnLibsWithTags: ['type:data'],
+              sourceTag: 'scope:frontend',
+              onlyDependOnLibsWithTags: ['scope:frontend', 'scope:mockoto', 'scope:shared'],
+            },
+            {
+              sourceTag: 'scope:mockoto',
+              onlyDependOnLibsWithTags: ['scope:mockoto', 'scope:shared'],
+            },
+            {
+              sourceTag: 'type:feature',
+              onlyDependOnLibsWithTags: ['type:feature', 'type:core', 'type:ui', 'type:common', 'type:models'],
+            },
+            {
+              sourceTag: 'type:common',
+              onlyDependOnLibsWithTags: ['type:core', 'type:ui', 'type:common', 'type:models'],
+            },
+            {
+              sourceTag: 'type:ui',
+              onlyDependOnLibsWithTags: ['type:core', 'type:ui', 'type:models'],
+            },
+            {
+              sourceTag: 'type:core',
+              onlyDependOnLibsWithTags: ['type:core', 'type:models'],
+            },
+            {
+              sourceTag: 'type:app',
+              onlyDependOnLibsWithTags: ['type:app', 'type:feature', 'type:core', 'type:ui', 'type:common', 'type:models', 'scope:shared', 'scope:backend', 'scope:frontend', 'scope:mockoto', 'scope:mockoto-ui'],
             },
           ],
         },

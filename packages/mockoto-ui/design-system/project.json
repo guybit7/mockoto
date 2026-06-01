@@ -1,0 +1,13 @@
+{
+  "name": "mockoto-design-system",
+  "$schema": "../../../node_modules/nx/schemas/project-schema.json",
+  "projectType": "library",
+  "sourceRoot": "packages/mockoto-ui/design-system/src",
+  "prefix": "mockoto",
+  "tags": ["scope:mockoto", "type:ui"],
+  "targets": {
+    "lint": {
+      "executor": "@nx/eslint:lint"
+    }
+  }
+}

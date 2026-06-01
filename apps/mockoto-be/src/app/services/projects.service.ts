@@ -1,23 +1,12 @@
 import { randomUUID } from 'crypto';
-// eslint-disable-next-line @nx/enforce-module-boundaries
 import { Project, CreateProjectDto, UpdateProjectDto } from '@mockoto/shared';
 import { ProjectsRepository, ProjectRow } from '../repositories/projects.repository';
-import { BaseService, NotFoundError } from './base.service';
+import { NotFoundError, ConflictError } from '../errors';
 
-export class ProjectsService extends BaseService<
-  Project,
-  ProjectRow,
-  CreateProjectDto,
-  UpdateProjectDto,
-  ProjectsRepository
-> {
-  protected readonly entityName = 'Project';
+export class ProjectsService {
+  constructor(private readonly repository: ProjectsRepository) {}
 
-  constructor(repository: ProjectsRepository) {
-    super(repository);
-  }
-
-  protected toEntity(row: ProjectRow): Project {
+  private toEntity(row: ProjectRow): Project {
     return {
       id: row.id,
       name: row.name,
@@ -27,11 +16,26 @@ export class ProjectsService extends BaseService<
       baseUrl: row.baseUrl,
       logoBase64: row.logoBase64 ?? undefined,
       logoUrl: row.logoUrl ?? undefined,
+      isFavorite: row.isFavorite,
       ownerName: row.ownerName ?? undefined,
     };
   }
 
+  async findAll(): Promise<Project[]> {
+    const rows = await this.repository.findAll();
+    return rows.map((r) => this.toEntity(r));
+  }
+
+  async findById(id: string): Promise<Project> {
+    const row = await this.repository.findById(id);
+    if (!row) throw new NotFoundError('Project', id);
+    return this.toEntity(row);
+  }
+
   async create(data: CreateProjectDto): Promise<Project> {
+    if (await this.repository.findByName(data.name)) {
+      throw new ConflictError(`A project named "${data.name}" already exists`);
+    }
     const now = Math.floor(Date.now() / 1000);
     const row = await this.repository.create({
       id: randomUUID(),
@@ -40,6 +44,7 @@ export class ProjectsService extends BaseService<
       baseUrl: data.baseUrl,
       logoBase64: data.logoBase64 ?? null,
       logoUrl: data.logoUrl ?? null,
+      isFavorite: data.isFavorite ?? false,
       ownerName: data.ownerName ?? null,
       createdAt: now,
       updatedAt: now,
@@ -48,11 +53,19 @@ export class ProjectsService extends BaseService<
   }
 
   async update(id: string, data: UpdateProjectDto): Promise<Project> {
-    const updatedRow = await this.repository.update(id, {
+    if (data.name && (await this.repository.findByName(data.name, id))) {
+      throw new ConflictError(`A project named "${data.name}" already exists`);
+    }
+    const row = await this.repository.update(id, {
       ...data,
       updatedAt: Math.floor(Date.now() / 1000),
     });
-    if (!updatedRow) throw new NotFoundError(this.entityName, id);
-    return this.toEntity(updatedRow);
+    if (!row) throw new NotFoundError('Project', id);
+    return this.toEntity(row);
+  }
+
+  async delete(id: string): Promise<void> {
+    const deleted = await this.repository.delete(id);
+    if (!deleted) throw new NotFoundError('Project', id);
   }
 }

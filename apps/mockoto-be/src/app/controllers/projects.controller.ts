@@ -1,5 +1,4 @@
 import { FastifyInstance, FastifyRequest, FastifyReply } from 'fastify';
-// eslint-disable-next-line @nx/enforce-module-boundaries
 import {
   CreateProjectDto,
   UpdateProjectDto,
@@ -28,6 +27,11 @@ export class ProjectsController extends BaseController {
     });
 
     fastify.put<{ Params: { id: string }; Body: UpdateProjectDto }>('/:id', {
+      preValidation: [validateBody(UpdateProjectSchema)],
+      handler: this.update,
+    });
+
+    fastify.patch<{ Params: { id: string }; Body: UpdateProjectDto }>('/:id', {
       preValidation: [validateBody(UpdateProjectSchema)],
       handler: this.update,
     });

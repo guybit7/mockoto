@@ -1,0 +1,13 @@
+{
+  "name": "mockoto-common",
+  "$schema": "../../../node_modules/nx/schemas/project-schema.json",
+  "projectType": "library",
+  "sourceRoot": "packages/mockoto-ui/common/src",
+  "prefix": "mockoto",
+  "tags": ["scope:mockoto", "type:common"],
+  "targets": {
+    "lint": {
+      "executor": "@nx/eslint:lint"
+    }
+  }
+}

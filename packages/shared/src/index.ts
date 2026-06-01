@@ -1,3 +1,4 @@
+export * from './lib/api-error';
 export * from './lib/base.entity';
 export * from './lib/validators';
 export * from './lib/project.model';

@@ -4,7 +4,7 @@
   "projectType": "library",
   "sourceRoot": "packages/mockoto-ui/core/src",
   "prefix": "mockoto-ui",
-  "tags": ["scope:mockoto-ui", "type:core"],
+  "tags": ["scope:mockoto-ui", "scope:mockoto", "type:core"],
   "targets": {
     "lint": {
       "executor": "@nx/eslint:lint"

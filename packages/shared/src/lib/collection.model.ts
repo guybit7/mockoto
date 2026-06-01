@@ -30,6 +30,7 @@ const BaseCollectionSchema = z.object({
   recordingStrategy: z.enum(RECORDING_STRATEGIES).default('none'),
   source: z.enum(COLLECTION_SOURCES).optional(),
   isActive: z.boolean().default(false),
+  isFavorite: z.boolean().default(false),
   ownerName: z.string().optional(),
 });
 
@@ -73,8 +74,15 @@ export const CreateCollectionSchema =
 // --------------------
 export const UpdateCollectionSchema = BaseCollectionSchema.omit({
   projectId: true,
-}) // MUST be before refine
+})
   .partial()
+  // Strip defaults so a partial PATCH never silently resets unrelated fields.
+  .extend({
+    mode:                z.enum(COLLECTION_MODES).optional(),
+    recordingStrategy:   z.enum(RECORDING_STRATEGIES).optional(),
+    isActive:            z.boolean().optional(),
+    isFavorite:          z.boolean().optional(),
+  })
   .superRefine(modeInvariant);
 
 // --------------------

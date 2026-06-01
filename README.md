@@ -1,285 +1,186 @@
-# Nx Angular Repository
+# Mockoto
 
-<a alt="Nx logo" href="https://nx.dev" target="_blank" rel="noreferrer"><img src="https://raw.githubusercontent.com/nrwl/nx/master/images/nx-logo.png" width="45"></a>
+**Build UI-first. Give your AI agent an API it can actually work with.**
 
-✨ A repository showcasing key [Nx](https://nx.dev) features for Angular monorepos ✨
-## Finish your Nx platform setup
+Mockoto is a CLI that runs a local API simulation layer for developers and AI agents. Install it, start the server, and manage projects, rules, and responses from the built-in web UI—or point your app at the traffic proxy.
 
-🚀 [Finish setting up your workspace](https://cloud.nx.app/connect/1iahGg2WbH) to get faster builds with remote caching, distributed task execution, and self-healing CI. [Learn more about Nx Cloud](https://nx.dev/ci/intro/why-nx-cloud).
+---
 
-## 📦 Project Overview
+## Install
 
-This repository demonstrates a production-ready Angular monorepo with:
-
-- **2 Applications**
-
-  - `shop` - Angular e-commerce application with product listings and detail views
-  - `api` - Backend API with Docker support serving product data
-
-- **6 Libraries**
-
-  - `@org/feature-products` - Product listing feature (Angular)
-  - `@org/feature-product-detail` - Product detail feature (Angular)
-  - `@org/data` - Data access layer for shop features
-  - `@org/shared-ui` - Shared UI components
-  - `@org/models` - Shared data models
-  - `@org/products` - API product service library
-
-- **E2E Testing**
-  - `shop-e2e` - Playwright tests for the shop application
-
-## 🚀 Quick Start
+**Requirements:** Node.js 20+ and npm 9+.
 
 ```bash
-# Clone the repository
-git clone <your-fork-url>
-cd <your-repository-name>
+npm install -g mockoto
+```
 
-# Install dependencies
-# (Note: You may need --legacy-peer-deps)
+Or run without installing:
+
+```bash
+npx mockoto
+```
+
+> **Windows note:** Mockoto uses SQLite via a native module. If install fails, add [Visual Studio Build Tools](https://visualstudio.microsoft.com/visual-cpp-build-tools/) with the “Desktop development with C++” workload, then retry.
+
+---
+
+## Start
+
+```bash
+mockoto
+```
+
+On first run, Mockoto:
+
+1. Creates a local database in `./data/mockoto.db` (relative to your current directory)
+2. Applies schema migrations automatically
+3. Starts the management server and traffic proxy
+4. Opens the web UI in your browser
+
+| Service            | Default URL               | Purpose                                            |
+| ------------------ | ------------------------- | -------------------------------------------------- |
+| **Web UI**         | http://localhost:3000     | Create projects, collections, rules, and responses |
+| **Management API** | http://localhost:3000/api | REST API (same host as the UI)                     |
+| **Traffic proxy**  | http://localhost:3001     | Send application traffic here                      |
+
+---
+
+## How it works
+
+```
+Your app / AI agent
+        │
+        ▼
+┌───────────────────┐     ┌────────────────────────────┐
+│  Traffic proxy    │     │  Management server (:3000)  │
+│  :3001            │     │  • Web UI                   │
+│  /:projectId/*    │     │  • REST API /api/*          │
+└─────────┬─────────┘     └────────────────────────────┘
+          │
+          ▼
+   Rule match → configured response
+   (or passthrough to upstream base_url)
+```
+
+1. **Create a project** in the UI — name, description, and upstream `base_url`.
+2. **Add a collection** — activate the set of endpoints you want served.
+3. **Define rules** — HTTP method, URL pattern, optional request body filter.
+4. **Attach responses** — status, headers, body, latency; mark one as active.
+5. **Point traffic at the proxy** — see below.
+
+---
+
+## Traffic proxy
+
+Send requests through the proxy using your project ID:
+
+```http
+GET http://localhost:3001/<project-id>/users/42
+```
+
+Mockoto matches the path against rules in the project's **active collection** and returns the configured response. When passthrough is enabled on a rule, unmatched or configured traffic can be forwarded to the project's `base_url`.
+
+**Example with curl:**
+
+```bash
+curl http://localhost:3001/your-project-id/api/health
+```
+
+---
+
+## Configuration
+
+Set environment variables before starting the CLI:
+
+| Variable     | Default      | Description                                                       |
+| ------------ | ------------ | ----------------------------------------------------------------- |
+| `HOST`       | `localhost`  | Bind address for both servers                                     |
+| `PORT`       | `3000`       | Management server (UI + API)                                      |
+| `PROXY_PORT` | `3001`       | Traffic proxy                                                     |
+| `NODE_ENV`   | `production` | Leave as default for full UI; use `development` for API-only mode |
+
+```bash
+PORT=8080 PROXY_PORT=8081 mockoto
+```
+
+**Data directory:** SQLite data is stored at `./data/mockoto.db` in the directory where you run `mockoto`. Run the CLI from your project root (or any folder) to keep data scoped to that workspace.
+
+---
+
+## Management API
+
+For scripts and automation, the REST API is available at `http://localhost:3000/api`.
+
+| Resource        | Path                                                       |
+| --------------- | ---------------------------------------------------------- |
+| Projects        | `/api/projects`                                            |
+| Collections     | `/api/projects/:projectId/collections`                     |
+| Rules           | `/api/projects/:projectId/collections/:collectionId/rules` |
+| Responses       | `/api/projects/.../rules/:ruleId/responses`                |
+| Agent (preview) | `POST /api/agent`                                          |
+
+---
+
+## Features
+
+| Capability         | Description                                                                 |
+| ------------------ | --------------------------------------------------------------------------- |
+| **Projects**       | Group endpoints under a project with a unique base URL                      |
+| **Collections**    | Version and switch response sets; one active collection per project         |
+| **Rules**          | Match by method, URL pattern (`path-to-regexp` or regex), and optional body |
+| **Responses**      | Multiple named responses per rule; status, headers, body, simulated latency |
+| **HTTP proxy**     | Resolve rules at request time; return configured responses or passthrough   |
+| **Agent endpoint** | Foundation for AI-driven scaffolding (integration in progress)              |
+
+### Agent skills (Cursor / OpenCode)
+
+Skills ship **inside the npm package** at `dist/apps/mockoto-be/skills/` (five packages: `mockoto`, `mockoto-api`, `mockoto-scaffold`, `mockoto-switching`, `mockoto-ui`).
+
+```bash
+# Path to bundled skills (after npm install -g mockoto)
+mockoto skills path
+
+# List packages and files
+mockoto skills list
+
+# Print copy commands into your project's .cursor/skills
+mockoto skills copy
+```
+
+While Mockoto is running:
+
+```http
+GET http://localhost:3000/api/skills
+GET http://localhost:3000/api/skills/mockoto-scaffold/scenarios.md
+```
+
+Monorepo contributors edit [`.cursor/skills/`](.cursor/skills/mockoto/SKILL.md); `npm run build:cli` copies them into dist. See [docs/mockoto-agent-skills-plan.md](docs/mockoto-agent-skills-plan.md).
+
+---
+
+## Roadmap
+
+- AI agent integration to scaffold projects, collections, rules, and responses from natural language
+- HAR import and traffic recording
+- Enhanced collection modes and collaboration
+
+---
+
+## Contributing
+
+Mockoto is developed in an Nx monorepo. To work on the source:
+
+```bash
+git clone <repository-url>
+cd mockoto
 npm install
-
-# Serve the Angular shop application (this will simultaneously serve the API backend)
-npx nx serve shop
-
-# ...or you can serve the API separately
-npx nx serve api
-
-# Build all projects
-npx nx run-many -t build
-
-# Run tests
-npx nx run-many -t test
-
-# Lint all projects
-npx nx run-many -t lint
-
-# Run e2e tests
-npx nx e2e shop-e2e
-
-# Run tasks in parallel
-
-npx nx run-many -t lint test build e2e --parallel=3
-
-# Visualize the project graph
-npx nx graph
+npx nx serve mockoto-ui    # dev UI + API
 ```
 
-## ⭐ Featured Nx Capabilities
+See the repository for lint, test, and build targets (`npx nx run-many -t lint test build`).
 
-This repository showcases several powerful Nx features:
+---
 
-### 1. 🔒 Module Boundaries
+## License
 
-Enforces architectural constraints using tags. Each project has specific dependencies it can use:
-
-- `scope:shared` - Can be used by all projects
-- `scope:shop` - Shop-specific libraries
-- `scope:api` - API-specific libraries
-- `type:feature` - Feature libraries
-- `type:data` - Data access libraries
-- `type:ui` - UI component libraries
-
-**Try it out:**
-
-```bash
-# See the current project graph and boundaries
-npx nx graph
-
-# View a specific project's details
-npx nx show project shop --web
-```
-
-[Learn more about module boundaries →](https://nx.dev/features/enforce-module-boundaries)
-
-### 2. 🐳 Docker Integration
-
-The API project includes Docker support with automated targets and release management:
-
-```bash
-# Build Docker image
-npx nx docker:build api
-
-# Run Docker container
-npx nx docker:run api
-
-# Release with automatic Docker image versioning
-npx nx release
-```
-
-**Nx Release for Docker:** The repository is configured to use Nx Release for managing Docker image versioning and publishing. When running `nx release`, Docker images for the API project are automatically versioned and published based on the release configuration in `nx.json`. This integrates seamlessly with semantic versioning and changelog generation.
-
-[Learn more about Docker integration →](https://nx.dev/recipes/nx-release/release-docker-images)
-
-### 3. 🎭 Playwright E2E Testing
-
-End-to-end testing with Playwright is pre-configured:
-
-```bash
-# Run e2e tests
-npx nx e2e shop-e2e
-
-# Run e2e tests in CI mode
-npx nx e2e-ci shop-e2e
-```
-
-[Learn more about E2E testing →](https://nx.dev/technologies/test-tools/playwright/introduction#e2e-testing)
-
-### 4. ⚡ Vitest for Unit Testing
-
-Fast unit testing with Vite for Angular libraries:
-
-```bash
-# Test a specific library
-npx nx test data
-
-# Test all projects
-npx nx run-many -t test
-```
-
-[Learn more about Vite testing →](https://nx.dev/recipes/vite)
-
-### 5. 🔧 Self-Healing CI
-
-The CI pipeline includes `nx fix-ci` which automatically identifies and suggests fixes for common issues:
-
-```bash
-# In CI, this command provides automated fixes
-npx nx fix-ci
-```
-
-This feature helps maintain a healthy CI pipeline by automatically detecting and suggesting solutions for:
-
-- Missing dependencies
-- Incorrect task configurations
-- Cache invalidation issues
-- Common build failures
-
-[Learn more about self-healing CI →](https://nx.dev/ci/features/self-healing-ci)
-
-## 📁 Project Structure
-
-```
-├── apps/
-│   ├── shop/           [scope:shop]    - Angular e-commerce app
-│   ├── shop-e2e/                       - E2E tests for shop
-│   └── api/            [scope:api]     - Backend API with Docker
-├── libs/
-│   ├── shop/
-│   │   ├── feature-products/        [scope:shop,type:feature] - Product listing
-│   │   ├── feature-product-detail/  [scope:shop,type:feature] - Product details
-│   │   ├── data/                    [scope:shop,type:data]    - Data access
-│   │   └── shared-ui/               [scope:shop,type:ui]      - UI components
-│   ├── api/
-│   │   └── products/    [scope:api]    - Product service
-│   └── shared/
-│       └── models/      [scope:shared,type:data] - Shared models
-├── nx.json             - Nx configuration
-├── tsconfig.json       - TypeScript configuration
-└── eslint.config.mjs   - ESLint with module boundary rules
-```
-
-## 🏷️ Understanding Tags
-
-This repository uses tags to enforce module boundaries:
-
-| Project            | Tags                         | Can Import From              |
-| ------------------ | ---------------------------- | ---------------------------- |
-| `shop`             | `scope:shop`                 | `scope:shop`, `scope:shared` |
-| `api`              | `scope:api`                  | `scope:api`, `scope:shared`  |
-| `feature-products` | `scope:shop`, `type:feature` | `scope:shop`, `scope:shared` |
-| `data`             | `scope:shop`, `type:data`    | `scope:shared`               |
-| `models`           | `scope:shared`, `type:data`  | Nothing (base library)       |
-
-## 📚 Useful Commands
-
-```bash
-# Project exploration
-npx nx graph                                    # Interactive dependency graph
-npx nx list                                     # List installed plugins
-npx nx show project shop --web                 # View project details
-
-# Development
-npx nx serve shop                              # Serve Angular app
-npx nx serve api                               # Serve backend API
-npx nx build shop                              # Build Angular app
-npx nx test data                               # Test a specific library
-npx nx lint feature-products                   # Lint a specific library
-
-# Running multiple tasks
-npx nx run-many -t build                       # Build all projects
-npx nx run-many -t test --parallel=3          # Test in parallel
-npx nx run-many -t lint test build            # Run multiple targets
-
-# Affected commands (great for CI)
-npx nx affected -t build                       # Build only affected projects
-npx nx affected -t test                        # Test only affected projects
-
-# Docker operations
-npx nx docker:build api                        # Build Docker image
-npx nx docker:run api                          # Run Docker container
-```
-
-## 🎯 Adding New Features
-
-### Generate a new Angular application:
-
-```bash
-npx nx g @nx/angular:app my-app
-```
-
-### Generate a new Angular library:
-
-```bash
-npx nx g @nx/angular:lib my-lib
-```
-
-### Generate a new Angular component:
-
-```bash
-npx nx g @nx/angular:component my-component --project=my-lib
-```
-
-### Generate a new API library:
-
-```bash
-npx nx g @nx/node:lib my-api-lib
-```
-
-You can use `npx nx list` to see all available plugins and `npx nx list <plugin-name>` to see all generators for a specific plugin.
-
-## Nx Cloud
-
-Nx Cloud ensures a [fast and scalable CI](https://nx.dev/ci/intro/why-nx-cloud?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects) pipeline. It includes features such as:
-
-- [Remote caching](https://nx.dev/ci/features/remote-cache?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
-- [Task distribution across multiple machines](https://nx.dev/ci/features/distribute-task-execution?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
-- [Automated e2e test splitting](https://nx.dev/ci/features/split-e2e-tasks?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
-- [Task flakiness detection and rerunning](https://nx.dev/ci/features/flaky-tasks?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
-
-## Install Nx Console
-
-Nx Console is an editor extension that enriches your developer experience. It lets you run tasks, generate code, and improves code autocompletion in your IDE. It is available for VSCode and IntelliJ.
-
-[Install Nx Console &raquo;](https://nx.dev/getting-started/editor-setup?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
-
-## 🔗 Learn More
-
-- [Nx Documentation](https://nx.dev)
-- [Angular Monorepo Tutorial](https://nx.dev/getting-started/tutorials/angular-monorepo-tutorial)
-- [Module Boundaries](https://nx.dev/features/enforce-module-boundaries)
-- [Docker Integration](https://nx.dev/recipes/nx-release/release-docker-images)
-- [Playwright Testing](https://nx.dev/technologies/test-tools/playwright/introduction#e2e-testing)
-- [Vite with Angular](https://nx.dev/recipes/vite)
-- [Nx Cloud](https://nx.dev/ci/intro/why-nx-cloud)
-- [Releasing Packages](https://nx.dev/features/manage-releases)
-
-## 💬 Community
-
-Join the Nx community:
-
-- [Discord](https://go.nx.dev/community)
-- [X (Twitter)](https://twitter.com/nxdevtools)
-- [LinkedIn](https://www.linkedin.com/company/nrwl)
-- [YouTube](https://www.youtube.com/@nxdevtools)
-- [Blog](https://nx.dev/blog)
+MIT (see `package.json`).

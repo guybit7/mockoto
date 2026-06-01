@@ -1,3 +1,22 @@
+# Mockoto domain (agent skills)
+
+For API mocking, projects, collections, rules, and responses, use the Mockoto skills (canonical: `.cursor/skills/`; also under `.agents/skills/`):
+
+| Skill               | Use when                                                      |
+| ------------------- | ------------------------------------------------------------- |
+| `mockoto`           | Orientation — which skill to load next                        |
+| `mockoto-api`       | REST CRUD on `localhost:3000/api` — see `agent-toolkit.md`    |
+| `mockoto-scaffold`  | End-to-end mock setup — see **`scenarios.md`** (18 playbooks) |
+| `mockoto-switching` | Active collection / active response (`isActive`)              |
+| `mockoto-ui`        | Angular UI routes and panel flows                             |
+
+**Agent max control:** full CRUD + switch + proxy verify via existing API only (`POST /api/agent` is stub).  
+Playbooks: `.cursor/skills/mockoto-scaffold/scenarios.md`. Troubleshooting: `.cursor/skills/mockoto/troubleshooting.md`.
+
+**Published CLI:** `npm run build:cli` copies skills to `dist/apps/mockoto-be/skills/`. Users run `mockoto skills path` or `GET /api/skills`.
+
+Plan and maintenance notes: `docs/mockoto-agent-skills-plan.md`.
+
 <!-- nx configuration start-->
 <!-- Leave the start & end comments to automatically receive updates. -->
 
