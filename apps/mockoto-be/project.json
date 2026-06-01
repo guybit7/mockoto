@@ -70,6 +70,14 @@
       "dependsOn": ["prune-lockfile", "copy-workspace-modules"],
       "executor": "nx:noop"
     },
+    "copy-agent-skills": {
+      "dependsOn": ["build"],
+      "executor": "nx:run-commands",
+      "outputs": ["{workspaceRoot}/dist/apps/mockoto-be/skills"],
+      "options": {
+        "command": "node scripts/copy-agent-skills.mjs"
+      }
+    },
     "db:seed": {
       "executor": "nx:run-commands",
       "options": {

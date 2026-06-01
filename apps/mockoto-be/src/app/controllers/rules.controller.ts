@@ -1,5 +1,4 @@
 import { FastifyInstance, FastifyRequest, FastifyReply } from 'fastify';
-// eslint-disable-next-line @nx/enforce-module-boundaries
 import {
   CreateRuleDto,
   UpdateRuleDto,
@@ -21,6 +20,12 @@ export class RulesController extends BaseController {
   protected async routes(fastify: FastifyInstance): Promise<void> {
     fastify.get('/', this.list);
 
+    // Static segment before /:id — otherwise "collection" is captured as an id.
+    fastify.get<{ Params: { collectionId: string } }>(
+      '/collection/:collectionId',
+      this.getByCollection,
+    );
+
     fastify.get<{ Params: { id: string } }>('/:id', this.getById);
 
     fastify.post<{ Body: CreateRuleDto }>('/', {
@@ -33,12 +38,25 @@ export class RulesController extends BaseController {
       handler: this.update,
     });
 
+    fastify.patch<{ Params: { id: string }; Body: UpdateRuleDto }>('/:id', {
+      preValidation: [validateBody(UpdateRuleSchema)],
+      handler: this.update,
+    });
+
     fastify.delete<{ Params: { id: string } }>('/:id', this.remove);
   }
 
   // --------------------
   // Handlers
   // --------------------
+
+  private getByCollection = async (
+    req: FastifyRequest<{ Params: { collectionId: string } }>,
+    reply: FastifyReply,
+  ) => {
+    const data = await this.service.findByCollection(req.params.collectionId);
+    return reply.send(data);
+  };
 
   private list = async (_req: FastifyRequest, reply: FastifyReply) => {
     const rules = await this.service.findAll();

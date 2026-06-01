@@ -1,5 +1,4 @@
 import { FastifyInstance, FastifyRequest, FastifyReply } from 'fastify';
-// eslint-disable-next-line @nx/enforce-module-boundaries
 import {
   CreateRuleResponseDto,
   UpdateRuleResponseDto,
@@ -21,26 +20,28 @@ export class RuleResponsesController extends BaseController {
   protected async routes(fastify: FastifyInstance): Promise<void> {
     fastify.get('/', this.list);
 
-    fastify.get<{ Params: { id: string } }>('/:id', this.getById);
-
-    // 🔥 חשוב: כל התשובות של rule
+    // Static segment before /:id — otherwise "rule" is captured as an id.
     fastify.get<{ Params: { ruleId: string } }>(
       '/rule/:ruleId',
       this.getByRuleId,
     );
+
+    fastify.get<{ Params: { id: string } }>('/:id', this.getById);
 
     fastify.post<{ Body: CreateRuleResponseDto }>('/', {
       preValidation: [validateBody(CreateRuleResponseSchema)],
       handler: this.create,
     });
 
-    fastify.put<{ Params: { id: string }; Body: UpdateRuleResponseDto }>(
-      '/:id',
-      {
-        preValidation: [validateBody(UpdateRuleResponseSchema)],
-        handler: this.update,
-      },
-    );
+    fastify.put<{ Params: { id: string }; Body: UpdateRuleResponseDto }>('/:id', {
+      preValidation: [validateBody(UpdateRuleResponseSchema)],
+      handler: this.update,
+    });
+
+    fastify.patch<{ Params: { id: string }; Body: UpdateRuleResponseDto }>('/:id', {
+      preValidation: [validateBody(UpdateRuleResponseSchema)],
+      handler: this.update,
+    });
 
     fastify.delete<{ Params: { id: string } }>('/:id', this.remove);
   }

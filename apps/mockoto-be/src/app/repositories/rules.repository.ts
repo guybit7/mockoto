@@ -1,17 +1,43 @@
-import { Column, eq, and } from 'drizzle-orm';
+import { eq, and, desc } from 'drizzle-orm';
 import { DB } from '../db';
 import { rules } from '../db/schema';
-import { BaseRepository } from './base.repository';
 
 export type RuleRow = typeof rules.$inferSelect;
 export type RuleInsert = typeof rules.$inferInsert;
 
-export class RulesRepository extends BaseRepository<RuleRow, RuleInsert> {
-  protected readonly table = rules;
-  protected readonly idColumn: Column<any> = rules.id;
+export class RulesRepository {
+  constructor(private readonly db: DB) {}
 
-  constructor(db: DB) {
-    super(db);
+  async findAll(): Promise<RuleRow[]> {
+    return this.db.select().from(rules);
+  }
+
+  async findById(id: string): Promise<RuleRow | null> {
+    const rows = await this.db.select().from(rules).where(eq(rules.id, id));
+    return rows[0] ?? null;
+  }
+
+  async create(data: RuleInsert): Promise<RuleRow> {
+    const rows = await this.db.insert(rules).values(data).returning();
+    return rows[0];
+  }
+
+  async update(id: string, data: Partial<Omit<RuleInsert, 'id'>>): Promise<RuleRow | null> {
+    const rows = await this.db.update(rules).set(data).where(eq(rules.id, id)).returning();
+    return rows[0] ?? null;
+  }
+
+  async delete(id: string): Promise<boolean> {
+    const rows = await this.db.delete(rules).where(eq(rules.id, id)).returning();
+    return rows.length > 0;
+  }
+
+  async findByCollection(collectionId: string): Promise<RuleRow[]> {
+    return this.db
+      .select()
+      .from(rules)
+      .where(eq(rules.collectionId, collectionId))
+      .orderBy(desc(rules.createdAt), desc(rules.id));
   }
 
   async findByLookup(
@@ -21,16 +47,15 @@ export class RulesRepository extends BaseRepository<RuleRow, RuleInsert> {
   ): Promise<RuleRow | null> {
     const rows = await this.db
       .select()
-      .from(this.table)
+      .from(rules)
       .where(
         and(
-          eq(this.table.collectionId, collectionId),
-          eq(this.table.requestMethod, method),
-          eq(this.table.lookupHash, lookupHash),
-          eq(this.table.isEnabled, true),
+          eq(rules.collectionId, collectionId),
+          eq(rules.requestMethod, method),
+          eq(rules.lookupHash, lookupHash),
+          eq(rules.isEnabled, true),
         ),
       );
-
     return rows[0] ?? null;
   }
 }

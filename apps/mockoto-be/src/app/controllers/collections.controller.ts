@@ -1,4 +1,3 @@
-/* eslint-disable @nx/enforce-module-boundaries */
 import { FastifyInstance, FastifyRequest, FastifyReply } from 'fastify';
 import {
   CreateCollectionDto,
@@ -20,24 +19,35 @@ export class CollectionsController extends BaseController {
   protected async routes(fastify: FastifyInstance): Promise<void> {
     fastify.get('/', this.list);
 
-    fastify.get<{ Params: { id: string } }>('/:id', this.getById);
+    // Static segments before /:id — otherwise "project" is captured as an id.
+    fastify.get<{ Params: { projectId: string } }>(
+      '/project/:projectId/active',
+      this.getActive,
+    );
+
+    fastify.get<{ Params: { projectId: string } }>(
+      '/project/:projectId',
+      this.getByProject,
+    );
 
     fastify.post<{ Body: CreateCollectionDto }>('/', {
       preValidation: [validateBody(CreateCollectionSchema)],
       handler: this.create,
     });
 
+    fastify.get<{ Params: { id: string } }>('/:id', this.getById);
+
     fastify.put<{ Params: { id: string }; Body: UpdateCollectionDto }>('/:id', {
       preValidation: [validateBody(UpdateCollectionSchema)],
       handler: this.update,
     });
 
-    fastify.delete<{ Params: { id: string } }>('/:id', this.remove);
+    fastify.patch<{ Params: { id: string }; Body: UpdateCollectionDto }>('/:id', {
+      preValidation: [validateBody(UpdateCollectionSchema)],
+      handler: this.update,
+    });
 
-    fastify.get<{ Params: { projectId: string } }>(
-      '/project/:projectId/active',
-      this.getActive,
-    );
+    fastify.delete<{ Params: { id: string } }>('/:id', this.remove);
   }
 
   private list = async (_req: FastifyRequest, reply: FastifyReply) => {
@@ -75,6 +85,14 @@ export class CollectionsController extends BaseController {
   ) => {
     await this.service.delete(req.params.id);
     return reply.code(204).send();
+  };
+
+  private getByProject = async (
+    req: FastifyRequest<{ Params: { projectId: string } }>,
+    reply: FastifyReply,
+  ) => {
+    const data = await this.service.findByProject(req.params.projectId);
+    return reply.send(data);
   };
 
   private getActive = async (

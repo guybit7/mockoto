@@ -14,6 +14,7 @@ export function runMigrations() {
       base_url TEXT NOT NULL UNIQUE,
       logo_base64 TEXT,
       logo_url TEXT,
+      is_favorite INTEGER NOT NULL DEFAULT 0,
       owner_name TEXT,
       created_at INTEGER NOT NULL DEFAULT (strftime('%s','now')),
       updated_at INTEGER NOT NULL DEFAULT (strftime('%s','now'))
@@ -33,6 +34,7 @@ export function runMigrations() {
       recording_strategy TEXT NOT NULL DEFAULT 'none',
       source TEXT,
       is_active INTEGER NOT NULL DEFAULT 0,
+      is_favorite INTEGER NOT NULL DEFAULT 0,
       owner_name TEXT,
       created_at INTEGER NOT NULL DEFAULT (strftime('%s','now')),
       updated_at INTEGER NOT NULL DEFAULT (strftime('%s','now')),
@@ -54,19 +56,18 @@ export function runMigrations() {
       project_id TEXT NOT NULL REFERENCES projects(id) ON DELETE CASCADE ON UPDATE CASCADE,
       collection_id TEXT NOT NULL REFERENCES collections(id) ON DELETE CASCADE ON UPDATE CASCADE,
       url TEXT NOT NULL,
-      url_pattern_type TEXT NOT NULL DEFAULT 'path-to-regexp',
       request_method TEXT NOT NULL,
       description TEXT,
       request_body TEXT,
       lookup_hash TEXT NOT NULL,
       passthrough INTEGER NOT NULL DEFAULT 0,
       type TEXT,
+      is_favorite INTEGER NOT NULL DEFAULT 0,
       is_enabled INTEGER NOT NULL DEFAULT 1,
       created_at INTEGER NOT NULL DEFAULT (strftime('%s','now')),
       updated_at INTEGER NOT NULL DEFAULT (strftime('%s','now')),
 
       CHECK(request_method IN ('GET','POST','PUT','DELETE','PATCH','HEAD','OPTIONS')),
-      CHECK(url_pattern_type IN ('path-to-regexp','regex')),
       CHECK(type IN ('manual','recorded')),
       CHECK(passthrough IN (0,1)),
       CHECK(is_enabled IN (0,1))
@@ -89,6 +90,7 @@ export function runMigrations() {
       rule_id TEXT NOT NULL REFERENCES rules(id) ON DELETE CASCADE ON UPDATE CASCADE,
       name TEXT,
       is_active INTEGER NOT NULL DEFAULT 0,
+      is_favorite INTEGER NOT NULL DEFAULT 0,
       status_code INTEGER NOT NULL DEFAULT 200,
       headers TEXT,
       body TEXT,
@@ -102,17 +104,14 @@ export function runMigrations() {
       CHECK(status_code >= 100 AND status_code <= 599)
     );
 
-    DROP INDEX IF EXISTS idx_rule_active_unique;
-    DROP INDEX IF EXISTS rule_responses_rule_id_unique;
-
-    CREATE INDEX IF NOT EXISTS idx_rule_responses_rule 
+    CREATE INDEX IF NOT EXISTS idx_rule_responses_rule
       ON rule_responses(rule_id);
 
-    CREATE INDEX IF NOT EXISTS idx_rule_responses_active 
+    CREATE INDEX IF NOT EXISTS idx_rule_responses_active
       ON rule_responses(rule_id, is_active);
 
-    CREATE UNIQUE INDEX IF NOT EXISTS idx_rule_active_unique 
-      ON rule_responses(rule_id) 
+    CREATE UNIQUE INDEX IF NOT EXISTS idx_rule_active_unique
+      ON rule_responses(rule_id)
       WHERE is_active = 1;
   `);
 }

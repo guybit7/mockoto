@@ -1,141 +1,113 @@
 import { randomUUID } from 'crypto';
-// eslint-disable-next-line @nx/enforce-module-boundaries
 import { Rule, CreateRuleDto, UpdateRuleDto } from '@mockoto/shared';
 import { RulesRepository, RuleRow } from '../repositories/rules.repository';
-import { BaseService, NotFoundError } from './base.service';
+import { NotFoundError, DuplicateRuleError } from '../errors';
 import { safeParseJson, normalizeJson } from '../utils/json';
 import { ruleLookupHash } from '../utils/rule-hash';
 
-export class RulesService extends BaseService<
-  Rule,
-  RuleRow,
-  CreateRuleDto,
-  UpdateRuleDto,
-  RulesRepository
-> {
-  protected readonly entityName = 'Rule';
+function isUniqueConstraintError(err: unknown): boolean {
+  return err instanceof Error && err.message.includes('UNIQUE constraint failed');
+}
 
-  constructor(repository: RulesRepository) {
-    super(repository);
-  }
+export class RulesService {
+  constructor(private readonly repository: RulesRepository) {}
 
-  // --------------------
-  // Helpers
-  // --------------------
-  private now() {
-    return Math.floor(Date.now() / 1000);
-  }
-
-  // --------------------
-  // Mapping (DB → Entity)
-  // --------------------
-  protected toEntity(row: RuleRow): Rule {
+  private toEntity(row: RuleRow): Rule {
     return {
       id: row.id,
       projectId: row.projectId,
       collectionId: row.collectionId,
       url: row.url,
-      urlPatternType: row.urlPatternType as Rule['urlPatternType'],
       requestMethod: row.requestMethod as Rule['requestMethod'],
       description: row.description ?? undefined,
       requestBody: safeParseJson(row.requestBody ?? undefined),
       lookupHash: row.lookupHash,
-      passthrough: !!row.passthrough,
+      passthrough: row.passthrough,
       type: (row.type as Rule['type']) ?? undefined,
-      isEnabled: !!row.isEnabled,
+      isFavorite: row.isFavorite,
+      isEnabled: row.isEnabled,
       createdAt: row.createdAt,
       updatedAt: row.updatedAt,
     };
   }
 
-  // --------------------
-  // Create
-  // --------------------
-  async create(data: CreateRuleDto): Promise<Rule> {
-    const normalizedBody =
-      data.requestBody != null ? normalizeJson(data.requestBody) : null;
+  async findAll(): Promise<Rule[]> {
+    const rows = await this.repository.findAll();
+    return rows.map((r) => this.toEntity(r));
+  }
 
+  async findById(id: string): Promise<Rule> {
+    const row = await this.repository.findById(id);
+    if (!row) throw new NotFoundError('Rule', id);
+    return this.toEntity(row);
+  }
+
+  async findByCollection(collectionId: string): Promise<Rule[]> {
+    const rows = await this.repository.findByCollection(collectionId);
+    return rows.map((r) => this.toEntity(r));
+  }
+
+  async create(data: CreateRuleDto): Promise<Rule> {
+    const normalizedBody = data.requestBody != null ? normalizeJson(data.requestBody) : null;
     try {
       const row = await this.repository.create({
         id: randomUUID(),
         projectId: data.projectId,
         collectionId: data.collectionId,
         url: data.url,
-        urlPatternType: data.urlPatternType,
         requestMethod: data.requestMethod,
         description: data.description ?? null,
         requestBody: normalizedBody,
-        lookupHash: ruleLookupHash(
-          data.url,
-          data.requestMethod,
-          normalizedBody,
-        ),
+        lookupHash: ruleLookupHash(data.url, data.requestMethod, normalizedBody),
         passthrough: data.passthrough,
         type: data.type ?? null,
+        isFavorite: data.isFavorite ?? false,
         isEnabled: data.isEnabled,
-        createdAt: this.now(),
-        updatedAt: this.now(),
+        createdAt: Math.floor(Date.now() / 1000),
+        updatedAt: Math.floor(Date.now() / 1000),
       });
-
       return this.toEntity(row);
-    } catch (err: any) {
-      // 🔥 handle unique constraint (duplicate rule)
-      if (err?.message?.includes('UNIQUE')) {
-        throw new Error('Rule already exists for this request');
-      }
+    } catch (err) {
+      if (isUniqueConstraintError(err)) throw new DuplicateRuleError();
       throw err;
     }
   }
 
-  // --------------------
-  // Update
-  // --------------------
-
   async update(id: string, data: UpdateRuleDto): Promise<Rule> {
     const hashFieldsChanged =
-      data.url !== undefined ||
-      data.requestMethod !== undefined ||
-      data.requestBody !== undefined;
+      data.url !== undefined || data.requestMethod !== undefined || data.requestBody !== undefined;
 
     let lookupHash: string | undefined;
     let normalizedBody: string | null | undefined;
 
     if (hashFieldsChanged) {
       const current = await this.repository.findById(id);
-      if (!current) throw new NotFoundError(this.entityName, id);
+      if (!current) throw new NotFoundError('Rule', id);
 
       const url = data.url ?? current.url;
       const requestMethod = data.requestMethod ?? current.requestMethod;
-
       normalizedBody =
-        data.requestBody !== undefined
-          ? normalizeJson(data.requestBody)
-          : current.requestBody;
-
+        data.requestBody !== undefined ? normalizeJson(data.requestBody) : current.requestBody;
       lookupHash = ruleLookupHash(url, requestMethod, normalizedBody);
-    } else {
-      // אם לא משנים body — לא נוגעים בו
-      if (data.requestBody !== undefined) {
-        normalizedBody = normalizeJson(data.requestBody);
-      }
     }
 
     try {
-      const updatedRow = await this.repository.update(id, {
+      const row = await this.repository.update(id, {
         ...data,
         ...(normalizedBody !== undefined && { requestBody: normalizedBody }),
         ...(lookupHash && { lookupHash }),
-        updatedAt: this.now(),
+        updatedAt: Math.floor(Date.now() / 1000),
       });
-
-      if (!updatedRow) throw new NotFoundError(this.entityName, id);
-
-      return this.toEntity(updatedRow);
-    } catch (err: any) {
-      if (err?.message?.includes('UNIQUE')) {
-        throw new Error('Rule update conflicts with existing rule');
-      }
+      if (!row) throw new NotFoundError('Rule', id);
+      return this.toEntity(row);
+    } catch (err) {
+      if (isUniqueConstraintError(err)) throw new DuplicateRuleError();
       throw err;
     }
+  }
+
+  async delete(id: string): Promise<void> {
+    const deleted = await this.repository.delete(id);
+    if (!deleted) throw new NotFoundError('Rule', id);
   }
 }

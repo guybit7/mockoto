@@ -97,7 +97,7 @@ async function run() {
         name: 'Success Response',
         isActive: true,
         statusCode: 200,
-        body: JSON.stringify({ users: [] }),
+        body: { users: [] },
       }),
     });
 
@@ -156,7 +156,7 @@ async function run() {
         name: 'Second Response',
         isActive: false,
         statusCode: 200,
-        body: JSON.stringify({ users: ['second'] }),
+        body: { users: ['second'] },
       }),
     });
 
@@ -168,8 +168,8 @@ async function run() {
       method: 'PUT',
       body: JSON.stringify({
         name: 'Edited Response',
-        headers: JSON.stringify({ 'x-test': '123' }),
-        body: JSON.stringify({ users: [{ id: 1 }] }),
+        headers: { 'x-test': '123' },
+        body: { users: [{ id: 1 }] },
       }),
     });
 

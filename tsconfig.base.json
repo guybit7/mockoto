@@ -16,6 +16,14 @@
     "baseUrl": ".",
     "paths": {
       "@mockoto-ui/core": ["packages/mockoto-ui/core/src/index.ts"],
+      "@mockoto-ui/table": ["packages/mockoto-ui/table/src/index.ts"],
+      "@mockoto-ui/common": ["packages/mockoto-ui/common/src/index.ts"],
+      "@mockoto-ui/design-system": ["packages/mockoto-ui/design-system/src/index.ts"],
+      "@mockoto-ui/features/projects": ["packages/mockoto-ui/features/projects/src/index.ts"],
+      "@mockoto-ui/features/collections": ["packages/mockoto-ui/features/collections/src/index.ts"],
+      "@mockoto-ui/features/rules": ["packages/mockoto-ui/features/rules/src/index.ts"],
+      "@mockoto-ui/features/responses": ["packages/mockoto-ui/features/responses/src/index.ts"],
+      "@mockoto-ui/features/home": ["packages/mockoto-ui/features/home/src/index.ts"],
       "@mockoto/shared": ["packages/shared/src/index.ts"]
     }
   },

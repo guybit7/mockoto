@@ -1,18 +1,28 @@
-import { Route } from '@angular/router';
-import { ShellComponent } from './layout/shell/shell.component';
+﻿import { Route } from '@angular/router';
+import { ShellComponent } from '@mockoto-ui/common';
 
 export const appRoutes: Route[] = [
-  { path: '', redirectTo: 'projects', pathMatch: 'full' },
+  { path: '', redirectTo: 'home', pathMatch: 'full' },
   {
     path: '',
     component: ShellComponent,
     children: [
       {
+        path: 'home',
+        loadChildren: () =>
+          import('@mockoto-ui/features/home').then(m => m.homeRoutes),
+      },
+      {
         path: 'projects',
         loadChildren: () =>
-          import('./features/projects/projects.routes').then(m => m.projectsRoutes),
+          import('@mockoto-ui/features/projects').then(m => m.projectsRoutes),
       },
     ],
   },
-  { path: '**', redirectTo: 'projects' },
+  {
+    path: 'response-viewer',
+    loadComponent: () =>
+      import('./response-viewer/response-viewer.component').then(m => m.ResponseViewerComponent),
+  },
+  { path: '**', redirectTo: 'home' },
 ];
