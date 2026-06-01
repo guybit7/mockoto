@@ -8,7 +8,7 @@ import { fileURLToPath } from 'node:url';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const workspaceRoot = path.resolve(__dirname, '..');
-const srcRoot = path.join(workspaceRoot, '.cursor', 'skills');
+const srcRoot = path.join(workspaceRoot, '.agents', 'skills');
 const destRoot = path.join(workspaceRoot, 'dist', 'apps', 'mockoto-be', 'skills');
 
 const PACKAGES = [
