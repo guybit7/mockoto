@@ -24,3 +24,5 @@ jobs:
       - run: npm ci
 
       - run: npm run build:cli
+        env:
+          NX_NO_CLOUD: true
