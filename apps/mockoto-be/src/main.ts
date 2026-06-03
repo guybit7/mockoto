@@ -21,8 +21,7 @@ const isProd = (process.env.NODE_ENV ?? 'production') === 'production';
 function resolveUiPath() {
   const root = path.resolve(__dirname);
   const candidates = [
-    path.resolve(root, '../../../../mockoto-ui/browser'),
-    path.resolve(root, '../../../../../mockoto-ui/browser'),
+    path.resolve(root, '../mockoto-ui/browser'),
     path.resolve(process.cwd(), 'dist/apps/mockoto-ui/browser'),
   ];
   for (const p of candidates) {
