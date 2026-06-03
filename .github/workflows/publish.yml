@@ -51,7 +51,7 @@ jobs:
         with:
           node-version: 20
           registry-url: 'https://npm.pkg.github.com'
-          scope: '@mockoto'
+          scope: '@guybit7'
 
       - name: Publish to GitHub Packages
         run: npm publish --ignore-scripts
