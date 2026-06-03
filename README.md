@@ -32,11 +32,9 @@ Mockoto starts a local server on `http://localhost:3000` and opens it in your br
 
 ## Legal
 
-Copyright (c) 2024-2026 Mockoto. All Rights Reserved.
-
 This software is proprietary and confidential. Unauthorized copying, distribution,
 modification, reverse engineering, sublicensing, or use — in whole or in part —
-is strictly prohibited without prior written permission from Mockoto.
+is strictly prohibited without prior written permission.
 
 This software is **not open source**. It is not licensed under any open source license.
 See the [LICENSE](./LICENSE) file for full terms.
