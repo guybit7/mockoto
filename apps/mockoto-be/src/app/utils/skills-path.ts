@@ -23,9 +23,9 @@ export function resolveSkillsRoot(): string | null {
 
   const candidates = [
     path.join(beDistRoot, 'skills'),
-    path.resolve(beDistRoot, '../../../../.cursor/skills'),
-    path.resolve(process.cwd(), '.cursor/skills'),
-    path.resolve(process.cwd(), 'node_modules/mockoto/dist/apps/mockoto-be/skills'),
+    path.resolve(beDistRoot, '../../../../.agents/skills'),
+    path.resolve(process.cwd(), '.agents/skills'),
+    path.resolve(process.cwd(), 'node_modules/@mockoto/cli/dist/apps/mockoto-be/skills'),
   ];
 
   for (const dir of candidates) {

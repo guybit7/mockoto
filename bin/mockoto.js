@@ -15,8 +15,8 @@ function resolveSkillsRoot() {
   const pkgRoot = path.resolve(__dirname, '..');
   const candidates = [
     path.join(pkgRoot, 'dist/apps/mockoto-be/skills'),
-    path.join(pkgRoot, '.cursor/skills'),
-    path.resolve(process.cwd(), '.cursor/skills'),
+    path.join(pkgRoot, '.agents/skills'),
+    path.resolve(process.cwd(), '.agents/skills'),
   ];
 
   for (const dir of candidates) {
