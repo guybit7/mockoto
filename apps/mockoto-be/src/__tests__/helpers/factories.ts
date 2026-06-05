@@ -10,7 +10,8 @@ import type { RuleRow } from '../../app/repositories/rules.repository';
 import type { RuleResponseRow } from '../../app/repositories/rule-responses.repository';
 import { ruleLookupHash } from '../../app/utils/rule-hash';
 
-const now = () => Math.floor(Date.now() / 1000);
+let _tick = 0;
+const now = () => Math.floor(Date.now() / 1000) + _tick++;
 
 // ── Projects ──────────────────────────────────────────────────────────────────
 
