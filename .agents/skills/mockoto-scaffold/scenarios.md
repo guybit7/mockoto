@@ -11,15 +11,26 @@ Use [agent-toolkit.md](../mockoto-api/agent-toolkit.md) for the HTTP helper.
 
 **When:** User says “what mocks exist?”, “find project X”, or before editing unknown data.
 
+**Preferred (one call):**
 ```
-GET  /api/projects
-GET  /api/collections/project/{projectId}
-GET  /api/collections/project/{projectId}/active
+GET  /api/projects/:id/manifest
+```
+Returns full tree: project, active collection, all rules with their active response, and a `readinessWarnings[]` array listing any rules with no active response. Use this instead of the 5-step chain below when you already know the project ID.
+
+**Fallback (project ID unknown):**
+```
+GET  /api/projects                                   → find project id by name
+GET  /api/projects/{projectId}/manifest              → everything else in one call
+```
+
+**Legacy multi-step chain (still works):**
+```
+GET  /api/collections/project/{projectId}/active     → includes readinessWarnings[] now
 GET  /api/rules/collection/{collectionId}
 GET  /api/rule-responses/rule/{ruleId}    (per rule)
 ```
 
-**Output for user:** project name/id, active collection, rule list (method + url), active response name per rule.
+**Output for user:** project name/id, active collection, rule list (method + url), active response name per rule, any readiness warnings.
 
 ---
 
@@ -31,25 +42,30 @@ GET  /api/rule-responses/rule/{ruleId}    (per rule)
 
 ```
 - [ ] POST /api/projects { name, baseUrl, description? }
-- [ ] POST /api/collections { projectId, name, mode:"local", recordingStrategy:"none", isActive:true }
+      → 409 with existing project in body if name taken — use existing.id and skip create
+- [ ] POST /api/collections { projectId, name, mode:”local”, recordingStrategy:”none”, isActive:true }
 - [ ] For each endpoint: POST /api/rules { projectId, collectionId, url, requestMethod, isEnabled:true }
+      → url may contain :param segments, e.g. “/users/:id”
+      → 409 with existing rule in body if duplicate — use existing.id and skip create
 - [ ] For each rule: POST /api/rule-responses × N { ruleId, name, statusCode, body:{...}, isActive on one }
-- [ ] GET  /api/collections/project/{projectId}/active
+- [ ] GET  /api/projects/{projectId}/manifest   → verify tree + check readinessWarnings[] is empty
 - [ ] GET  http://localhost:3001/{projectId}{path} per rule
 ```
 
-**Example — 3 GET endpoints, 2 responses each**
+**Example — full CRUD resource `/users/:id`**
 
 | Step | Request body (key fields) |
 |------|---------------------------|
-| Project | `{ "name": "Payments Demo", "baseUrl": "https://api.example.com" }` |
-| Collection | `{ "projectId", "name": "v1", "mode": "local", "isActive": true }` |
-| Rule 1 | `{ "url": "/health", "requestMethod": "GET" }` |
-| Rule 1 responses | `{ "name": "OK", "isActive": true, "statusCode": 200, "body": { "status": "ok" } }` + inactive error variant |
-| Rule 2 | `{ "url": "/users", "requestMethod": "GET" }` |
-| Rule 3 | `{ "url": "/orders", "requestMethod": "GET" }` |
+| Project | `{ “name”: “Users API”, “baseUrl”: “https://api.example.com” }` |
+| Collection | `{ “projectId”, “name”: “v1”, “mode”: “local”, “isActive”: true }` |
+| Rule GET list | `{ “url”: “/users”, “requestMethod”: “GET” }` |
+| Rule GET one | `{ “url”: “/users/:id”, “requestMethod”: “GET” }` |
+| Rule POST | `{ “url”: “/users”, “requestMethod”: “POST” }` |
+| Rule PUT | `{ “url”: “/users/:id”, “requestMethod”: “PUT” }` |
+| Rule DELETE | `{ “url”: “/users/:id”, “requestMethod”: “DELETE” }` |
+| POST response | `{ “statusCode”: 201, “isActive”: true, “body”: { “id”: “w001”, “name”: “Jane”, “createdAt”: “2026-01-01” } }` |
 
-**Verify:** Each proxy URL returns expected JSON object (not escaped string).
+**Verify:** `GET /api/projects/{id}/manifest` — `readinessWarnings` must be empty before testing proxy.
 
 ---
 
@@ -282,7 +298,7 @@ For each collection:
 DELETE /api/projects/{projectId}
 ```
 
-If `DELETE /projects/{id}` cascades in your DB version, still prefer explicit child deletes when unsure.
+`DELETE /projects/{id}` cascades automatically (collections → rules → responses). Explicit child deletes above are only needed for partial teardown.
 
 ---
 
@@ -323,14 +339,10 @@ PUT /api/projects/{id}
 **When:** User wants JSON summary for docs or another agent.
 
 ```
-GET /projects/{id}
-GET /collections/project/{id}/active
-GET /rules/collection/{collectionId}
-For each rule:
-  GET /rule-responses/rule/{ruleId}
+GET /api/projects/:id/manifest
 ```
 
-Build manifest: `{ project, activeCollection, rules: [{ url, method, activeResponse: { statusCode, body } }] }`.
+Returns `{ project, activeCollection, rules[{ url, requestMethod, isEnabled, responseCount, activeResponse }], readinessWarnings }` in one call. Use `readinessWarnings` to flag incomplete rules before reporting to the user.
 
 ---
 

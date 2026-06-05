@@ -1,9 +1,42 @@
+// import { randomUUID } from 'crypto';
 import { ProjectsRepository, ProjectRow } from '../repositories/projects.repository';
 import { MockResolver } from './mock-resolver';
 import { RequestForwarder, ForwardResult } from './request-forwarder';
 import { ResponseRecorder } from './response-recorder';
 import { CollectionRow } from '../repositories/collections.repository';
 import { RecordingStrategy } from '@mockoto/shared';
+
+// TODO: re-enable applyTemplate once the UI exposes a per-rule toggle for template variables.
+// Variables supported: {{$uuid}}, {{$timestamp}}, {{$isodate}}, {{$body.path.to.field}}
+//
+// function applyTemplate(bodyStr: string, requestBody: string | null): string {
+//   let out = bodyStr;
+//   out = out.replace(/\{\{\s*\$uuid\s*\}\}/g, () => randomUUID());
+//   out = out.replace(/\{\{\s*\$timestamp\s*\}\}/g, () => String(Math.floor(Date.now() / 1000)));
+//   out = out.replace(/\{\{\s*\$isodate\s*\}\}/g, () => new Date().toISOString());
+//
+//   if (requestBody) {
+//     try {
+//       const parsed: unknown = JSON.parse(requestBody);
+//       out = out.replace(/\{\{\s*\$body\.([^}\s]+)\s*\}\}/g, (_, keyPath: string) => {
+//         const value = keyPath.split('.').reduce<unknown>((obj, key) => {
+//           if (obj !== null && typeof obj === 'object') {
+//             return (obj as Record<string, unknown>)[key];
+//           }
+//           return undefined;
+//         }, parsed);
+//         return value !== undefined && value !== null
+//           ? typeof value === 'string'
+//             ? JSON.stringify(value).slice(1, -1)
+//             : String(JSON.stringify(value))
+//           : '';
+//       });
+//     } catch {
+//       // Request body is not valid JSON — $body. templates remain unreplaced
+//     }
+//   }
+//   return out;
+// }
 
 export type ProxyRequest = {
   projectId: string;
@@ -61,6 +94,7 @@ export class ProxyOrchestrator {
             Object.assign(headers, stored);
           } catch { /* use stored defaults */ }
         }
+        // TODO: replace with applyTemplate(response.body, req.body) once UI toggle is ready.
         return {
           statusCode: response.statusCode,
           headers,

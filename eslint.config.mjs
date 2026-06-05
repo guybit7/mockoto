@@ -30,11 +30,19 @@ export default [
             },
             {
               sourceTag: 'scope:mockoto-ui',
-              onlyDependOnLibsWithTags: ['scope:mockoto-ui', 'scope:mockoto', 'scope:shared'],
+              onlyDependOnLibsWithTags: [
+                'scope:mockoto-ui',
+                'scope:mockoto',
+                'scope:shared',
+              ],
             },
             {
               sourceTag: 'scope:frontend',
-              onlyDependOnLibsWithTags: ['scope:frontend', 'scope:mockoto', 'scope:shared'],
+              onlyDependOnLibsWithTags: [
+                'scope:frontend',
+                'scope:mockoto',
+                'scope:shared',
+              ],
             },
             {
               sourceTag: 'scope:mockoto',
@@ -42,11 +50,22 @@ export default [
             },
             {
               sourceTag: 'type:feature',
-              onlyDependOnLibsWithTags: ['type:feature', 'type:core', 'type:ui', 'type:common', 'type:models'],
+              onlyDependOnLibsWithTags: [
+                'type:feature',
+                'type:core',
+                'type:ui',
+                'type:common',
+                'type:models',
+              ],
             },
             {
               sourceTag: 'type:common',
-              onlyDependOnLibsWithTags: ['type:core', 'type:ui', 'type:common', 'type:models'],
+              onlyDependOnLibsWithTags: [
+                'type:core',
+                'type:ui',
+                'type:common',
+                'type:models',
+              ],
             },
             {
               sourceTag: 'type:ui',
@@ -58,7 +77,19 @@ export default [
             },
             {
               sourceTag: 'type:app',
-              onlyDependOnLibsWithTags: ['type:app', 'type:feature', 'type:core', 'type:ui', 'type:common', 'type:models', 'scope:shared', 'scope:backend', 'scope:frontend', 'scope:mockoto', 'scope:mockoto-ui'],
+              onlyDependOnLibsWithTags: [
+                'type:app',
+                'type:feature',
+                'type:core',
+                'type:ui',
+                'type:common',
+                'type:models',
+                'scope:shared',
+                'scope:backend',
+                'scope:frontend',
+                'scope:mockoto',
+                'scope:mockoto-ui',
+              ],
             },
           ],
         },

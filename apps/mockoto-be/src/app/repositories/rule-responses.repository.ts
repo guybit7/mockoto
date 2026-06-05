@@ -1,4 +1,4 @@
-import { eq, and, ne, desc } from 'drizzle-orm';
+import { eq, and, ne, desc, inArray } from 'drizzle-orm';
 import { DB } from '../db';
 import { ruleResponses } from '../db/schema';
 
@@ -34,6 +34,20 @@ export class RuleResponsesRepository {
 
   async findByRuleId(ruleId: string): Promise<RuleResponseRow[]> {
     return this.db.select().from(ruleResponses).where(eq(ruleResponses.ruleId, ruleId));
+  }
+
+  async findByRuleIds(ruleIds: string[]): Promise<RuleResponseRow[]> {
+    if (ruleIds.length === 0) return [];
+    const CHUNK = 500;
+    if (ruleIds.length <= CHUNK) {
+      return this.db.select().from(ruleResponses).where(inArray(ruleResponses.ruleId, ruleIds));
+    }
+    const results: RuleResponseRow[] = [];
+    for (let i = 0; i < ruleIds.length; i += CHUNK) {
+      const rows = await this.db.select().from(ruleResponses).where(inArray(ruleResponses.ruleId, ruleIds.slice(i, i + CHUNK)));
+      results.push(...rows);
+    }
+    return results;
   }
 
   async findActiveByRuleId(ruleId: string): Promise<RuleResponseRow | null> {

@@ -8,6 +8,9 @@
 4. **Verify proxy** — `GET :3001/:projectId/path` after changes that affect traffic.
 5. **One active** — collection per project, response per rule; single `isActive: true` call to switch.
 6. **Right skill** — `mockoto` → pick child; full work in [scenarios.md](../mockoto-scaffold/scenarios.md).
+7. **Manifest first** — after scaffolding, call `GET /api/projects/:id/manifest` and check `readinessWarnings[]` is empty before testing the proxy. A non-empty array means some rules will return 404.
+8. **409 carries existing** — when POST /projects or POST /rules returns 409, read `response.existing.id` and continue. Never scan the full list to recover from a conflict.
+9. **Use :param in URLs** — `/users/:id` works in rule URLs; the proxy matches by pattern when exact hash fails. No need to create one rule per ID.
 
 ## Skill loading
 
@@ -55,7 +58,7 @@ On API route changes: update `api-reference.md`, `scenarios.md`, `e2e-test.ts`.
 ```
 GET /api/projects
 POST chain → ids
-GET /api/collections/project/:id/active
+GET /api/projects/:id/manifest
 GET :3001/:projectId/path
 GET /api/rule-responses/rule/:ruleId  → one isActive:true
 ```

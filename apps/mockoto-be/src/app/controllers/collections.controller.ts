@@ -99,7 +99,7 @@ export class CollectionsController extends BaseController {
     req: FastifyRequest<{ Params: { projectId: string } }>,
     reply: FastifyReply,
   ) => {
-    const data = await this.service.getActiveCollection(req.params.projectId);
-    return reply.send(data);
+    const { collection, readinessWarnings } = await this.service.getActiveWithWarnings(req.params.projectId);
+    return reply.send({ ...collection, readinessWarnings });
   };
 }
