@@ -1,7 +1,7 @@
-import { sqliteDb } from './index';
+import type { Database } from 'better-sqlite3';
 
-export function runMigrations() {
-  sqliteDb.exec(`
+export function migrateDb(db: Database): void {
+  db.exec(`
     PRAGMA foreign_keys = ON;
 
     -- =========================
@@ -114,4 +114,10 @@ export function runMigrations() {
       ON rule_responses(rule_id)
       WHERE is_active = 1;
   `);
+}
+
+export function runMigrations() {
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
+  const { sqliteDb } = require('./index') as typeof import('./index');
+  migrateDb(sqliteDb);
 }
