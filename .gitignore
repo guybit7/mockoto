@@ -58,3 +58,4 @@ vitest.config.*.timestamp*
 .env
 /internal
 apps/demos/*
+apps/mockoto-be/data/*

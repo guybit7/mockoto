@@ -10,6 +10,9 @@
   "scripts": {
     "prepublishOnly": "npm run build:cli",
     "build:cli": "nx build mockoto-ui && nx build mockoto-be --configuration=production && nx run mockoto-be:copy-agent-skills",
+    "test": "vitest run --root apps/mockoto-be",
+    "test:watch": "vitest --root apps/mockoto-be",
+    "test:coverage": "vitest run --root apps/mockoto-be --coverage",
     "test:e2e": "tsx scripts/e2e-test.ts"
   },
   "bin": {
