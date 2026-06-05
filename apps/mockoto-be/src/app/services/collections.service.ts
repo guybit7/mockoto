@@ -8,7 +8,14 @@ import {
   COLLECTION_SOURCES,
 } from '@mockoto/shared';
 import { CollectionsRepository, CollectionRow } from '../repositories/collections.repository';
+import { RulesRepository } from '../repositories/rules.repository';
+import { RuleResponsesRepository } from '../repositories/rule-responses.repository';
 import { NotFoundError, NoActiveCollectionError, ConflictError } from '../errors';
+
+export interface ActiveCollectionResult {
+  collection: Collection;
+  readinessWarnings: string[];
+}
 
 // ─── DB value parsers ──────────────────────────────────────────────────────────
 // The DB CHECK constraints guarantee these values are valid; the parsers
@@ -39,7 +46,11 @@ function parseSource(value: string | null): Collection['source'] {
 // ─── Service ──────────────────────────────────────────────────────────────────
 
 export class CollectionsService {
-  constructor(private readonly repository: CollectionsRepository) {}
+  constructor(
+    private readonly repository: CollectionsRepository,
+    private readonly rulesRepo: RulesRepository,
+    private readonly ruleResponsesRepo: RuleResponsesRepository,
+  ) {}
 
   private toEntity(row: CollectionRow): Collection {
     return {
@@ -74,10 +85,23 @@ export class CollectionsService {
     return rows.map((r) => this.toEntity(r));
   }
 
-  async getActiveCollection(projectId: string): Promise<Collection> {
+  async getActiveWithWarnings(projectId: string): Promise<ActiveCollectionResult> {
     const row = await this.repository.findActiveByProject(projectId);
     if (!row) throw new NoActiveCollectionError(projectId);
-    return this.toEntity(row);
+    const collection = this.toEntity(row);
+    const readinessWarnings: string[] = [];
+
+    const rules = await this.rulesRepo.findByCollection(row.id);
+    const enabledRules = rules.filter((r) => r.isEnabled);
+    const allResponses = await this.ruleResponsesRepo.findByRuleIds(enabledRules.map((r) => r.id));
+    const activeRuleIds = new Set(allResponses.filter((r) => r.isActive).map((r) => r.ruleId));
+    for (const rule of enabledRules) {
+      if (!activeRuleIds.has(rule.id)) {
+        readinessWarnings.push(`Rule ${rule.requestMethod} ${rule.url} has no active response — proxy will return 404`);
+      }
+    }
+
+    return { collection, readinessWarnings };
   }
 
   async create(data: CreateCollectionDto): Promise<Collection> {

@@ -30,19 +30,25 @@ export class NoActiveCollectionError extends Error {
 
 export class ConflictError extends Error {
   readonly code = ERROR_CODE.CONFLICT;
-  constructor(message: string) {
+  readonly existing?: unknown;
+  constructor(message: string, existing?: unknown) {
     super(message);
     this.name = 'ConflictError';
+    this.existing = existing;
   }
-  toResponse(): ApiErrorBody {
-    return { code: this.code, message: this.message };
+  toResponse(): ApiErrorBody & { existing?: unknown } {
+    return {
+      code: this.code,
+      message: this.message,
+      ...(this.existing !== undefined ? { existing: this.existing } : {}),
+    };
   }
 }
 
 // Thrown when a rule insert/update violates the unique (collectionId, lookupHash) index.
 export class DuplicateRuleError extends ConflictError {
-  constructor() {
-    super('A rule for this URL + method + body already exists in the collection');
+  constructor(existing?: unknown) {
+    super('A rule for this URL + method + body already exists in the collection', existing);
     this.name = 'DuplicateRuleError';
   }
 }

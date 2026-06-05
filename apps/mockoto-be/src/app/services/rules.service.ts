@@ -49,6 +49,12 @@ export class RulesService {
 
   async create(data: CreateRuleDto): Promise<Rule> {
     const normalizedBody = data.requestBody != null ? normalizeJson(data.requestBody) : null;
+    const hash = ruleLookupHash(data.url, data.requestMethod, normalizedBody);
+
+    // Pre-check so the 409 can carry the existing rule — avoids relying on the DB error alone.
+    const existing = await this.repository.findByLookup(data.collectionId, data.requestMethod, hash);
+    if (existing) throw new DuplicateRuleError(this.toEntity(existing));
+
     try {
       const row = await this.repository.create({
         id: randomUUID(),
@@ -58,7 +64,7 @@ export class RulesService {
         requestMethod: data.requestMethod,
         description: data.description ?? null,
         requestBody: normalizedBody,
-        lookupHash: ruleLookupHash(data.url, data.requestMethod, normalizedBody),
+        lookupHash: hash,
         passthrough: data.passthrough,
         type: data.type ?? null,
         isFavorite: data.isFavorite ?? false,
@@ -68,7 +74,15 @@ export class RulesService {
       });
       return this.toEntity(row);
     } catch (err) {
-      if (isUniqueConstraintError(err)) throw new DuplicateRuleError();
+      if (isUniqueConstraintError(err)) {
+        try {
+          const conflict = await this.repository.findByLookup(data.collectionId, data.requestMethod, hash);
+          throw new DuplicateRuleError(conflict ? this.toEntity(conflict) : undefined);
+        } catch (lookupErr) {
+          if (lookupErr instanceof DuplicateRuleError) throw lookupErr;
+          throw new DuplicateRuleError();
+        }
+      }
       throw err;
     }
   }
@@ -79,15 +93,16 @@ export class RulesService {
 
     let lookupHash: string | undefined;
     let normalizedBody: string | null | undefined;
+    let currentRow: RuleRow | null = null;
 
     if (hashFieldsChanged) {
-      const current = await this.repository.findById(id);
-      if (!current) throw new NotFoundError('Rule', id);
+      currentRow = await this.repository.findById(id);
+      if (!currentRow) throw new NotFoundError('Rule', id);
 
-      const url = data.url ?? current.url;
-      const requestMethod = data.requestMethod ?? current.requestMethod;
+      const url = data.url ?? currentRow.url;
+      const requestMethod = data.requestMethod ?? currentRow.requestMethod;
       normalizedBody =
-        data.requestBody !== undefined ? normalizeJson(data.requestBody) : current.requestBody;
+        data.requestBody !== undefined ? normalizeJson(data.requestBody) : currentRow.requestBody;
       lookupHash = ruleLookupHash(url, requestMethod, normalizedBody);
     }
 
@@ -101,6 +116,16 @@ export class RulesService {
       if (!row) throw new NotFoundError('Rule', id);
       return this.toEntity(row);
     } catch (err) {
+      if (isUniqueConstraintError(err) && lookupHash && currentRow) {
+        try {
+          const requestMethod = data.requestMethod ?? currentRow.requestMethod;
+          const conflict = await this.repository.findByLookup(currentRow.collectionId, requestMethod, lookupHash);
+          throw new DuplicateRuleError(conflict ? this.toEntity(conflict) : undefined);
+        } catch (lookupErr) {
+          if (lookupErr instanceof DuplicateRuleError) throw lookupErr;
+          throw new DuplicateRuleError();
+        }
+      }
       if (isUniqueConstraintError(err)) throw new DuplicateRuleError();
       throw err;
     }

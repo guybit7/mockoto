@@ -19,6 +19,9 @@ export class ProjectsController extends BaseController {
   protected async routes(fastify: FastifyInstance): Promise<void> {
     fastify.get('/', this.list);
 
+    // Static segment must come before /:id so "manifest" isn't captured as an id.
+    fastify.get<{ Params: { id: string } }>('/:id/manifest', this.getManifest);
+
     fastify.get<{ Params: { id: string } }>('/:id', this.getById);
 
     fastify.post<{ Body: CreateProjectDto }>('/', {
@@ -74,5 +77,13 @@ export class ProjectsController extends BaseController {
   ) => {
     await this.service.delete(req.params.id);
     return reply.code(204).send();
+  };
+
+  private getManifest = async (
+    req: FastifyRequest<{ Params: { id: string } }>,
+    reply: FastifyReply,
+  ) => {
+    const manifest = await this.service.getManifest(req.params.id);
+    return reply.send(manifest);
   };
 }

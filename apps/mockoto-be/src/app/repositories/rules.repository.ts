@@ -58,4 +58,19 @@ export class RulesRepository {
       );
     return rows[0] ?? null;
   }
+
+  // Used as fallback when exact hash lookup misses — fetches all enabled rules
+  // for a (collection, method) pair so the caller can do pattern matching.
+  async findByMethodAndCollection(collectionId: string, method: string): Promise<RuleRow[]> {
+    return this.db
+      .select()
+      .from(rules)
+      .where(
+        and(
+          eq(rules.collectionId, collectionId),
+          eq(rules.requestMethod, method),
+          eq(rules.isEnabled, true),
+        ),
+      );
+  }
 }
