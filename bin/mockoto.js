@@ -120,11 +120,22 @@ function formatUptime(seconds) {
 // ─── Commands ─────────────────────────────────────────────────────────────────
 
 async function cmdStart() {
+  const mainPath = path.resolve(__dirname, '../dist/apps/mockoto-be/main.js');
+  if (!fs.existsSync(mainPath)) {
+    fatal('Server binary not found — try reinstalling: npm install -g @guybit7/mockoto-cli');
+    return;
+  }
   try {
-    require('../dist/apps/mockoto-be/main.js');
+    require(mainPath);
   } catch (err) {
     if (err.code === 'MODULE_NOT_FOUND') {
-      fatal('Server binary not found — try reinstalling: npm install -g @guybit7/mockoto');
+      fatal(
+        `A required native dependency is missing.\n` +
+        `  This is usually better-sqlite3 failing to install on your platform.\n` +
+        `  Try: npm install -g @guybit7/mockoto-cli --build-from-source\n` +
+        `  Or ensure you have Python and a C++ compiler installed (Windows: npm install -g windows-build-tools)`
+      );
+      return;
     }
     throw err;
   }
@@ -133,6 +144,13 @@ async function cmdStart() {
 async function cmdOpen() {
   const cfg = loadConfig();
   const url = `http://${cfg.host}:${cfg.port}`;
+  try {
+    await apiGet(`${url}/api/status`);
+  } catch {
+    fail('Mockoto is not running');
+    console.log(`   Start it with: ${colour(C.bold, 'mockoto')}`);
+    process.exit(1);
+  }
   const { default: open } = await import('open');
   await open(url);
   success(`Opened ${url}`);
