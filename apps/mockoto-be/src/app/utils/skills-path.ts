@@ -1,24 +1,12 @@
 import fs from 'fs';
 import path from 'path';
 
-/** Skill package folder names shipped with the CLI */
-export const MOCKOTO_SKILL_PACKAGES = [
-  'mockoto',
-  'mockoto-api',
-  'mockoto-scaffold',
-  'mockoto-switching',
-  'mockoto-ui',
-] as const;
-
-export type MockotoSkillPackage = (typeof MOCKOTO_SKILL_PACKAGES)[number];
-
 /**
  * Resolve the directory containing mockoto* agent skills.
  * Production: dist/apps/mockoto-be/skills (copied at build)
- * Development: .cursor/skills in repo root
+ * Development: .agents/skills in repo root
  */
 export function resolveSkillsRoot(): string | null {
-  /** Bundled main.js lives in dist/apps/mockoto-be */
   const beDistRoot = path.resolve(__dirname);
 
   const candidates = [
@@ -37,13 +25,31 @@ export function resolveSkillsRoot(): string | null {
   return null;
 }
 
+const _packageNamesCache = new Map<string, string[]>();
+
+/** Discover all mockoto skill package names present in a skills root. Result is cached per root. */
+function discoverPackageNames(root: string): string[] {
+  const cached = _packageNamesCache.get(root);
+  if (cached) return cached;
+  const names = !fs.existsSync(root)
+    ? []
+    : fs
+        .readdirSync(root, { withFileTypes: true })
+        .filter((e) => e.isDirectory() && e.name.startsWith('mockoto'))
+        .filter((e) => fs.existsSync(path.join(root, e.name, 'SKILL.md')))
+        .map((e) => e.name)
+        .sort();
+  _packageNamesCache.set(root, names);
+  return names;
+}
+
 export type SkillFileEntry = {
   relativePath: string;
   sizeBytes: number;
 };
 
 export type SkillPackageInfo = {
-  name: MockotoSkillPackage;
+  name: string;
   skillMd: string;
   files: SkillFileEntry[];
 };
@@ -52,25 +58,20 @@ function walkFiles(dir: string, base: string): SkillFileEntry[] {
   const entries: SkillFileEntry[] = [];
   if (!fs.existsSync(dir)) return entries;
 
-  for (const name of fs.readdirSync(dir, { withFileTypes: true })) {
-    const full = path.join(dir, name.name);
-    const rel = path.join(base, name.name).replace(/\\/g, '/');
-    if (name.isDirectory()) {
+  for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
+    const full = path.join(dir, entry.name);
+    const rel = path.join(base, entry.name).replace(/\\/g, '/');
+    if (entry.isDirectory()) {
       entries.push(...walkFiles(full, rel));
     } else {
-      entries.push({
-        relativePath: rel,
-        sizeBytes: fs.statSync(full).size,
-      });
+      entries.push({ relativePath: rel, sizeBytes: fs.statSync(full).size });
     }
   }
   return entries;
 }
 
 export function listSkillPackages(root: string): SkillPackageInfo[] {
-  return MOCKOTO_SKILL_PACKAGES.filter((name) =>
-    fs.existsSync(path.join(root, name, 'SKILL.md')),
-  ).map((name) => {
+  return discoverPackageNames(root).map((name) => {
     const pkgDir = path.join(root, name);
     return {
       name,
@@ -85,7 +86,8 @@ export function readSkillFile(
   skillName: string,
   relativePath: string,
 ): string | null {
-  if (!MOCKOTO_SKILL_PACKAGES.includes(skillName as MockotoSkillPackage)) {
+  // Only serve packages that actually exist in the skills root (prevents enumeration attacks)
+  if (!discoverPackageNames(root).includes(skillName)) {
     return null;
   }
 

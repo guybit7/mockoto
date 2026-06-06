@@ -13,7 +13,7 @@ For API mocking, projects, collections, rules, and responses, use the Mockoto sk
 **Agent max control:** full CRUD + switch + proxy verify via existing API only (`POST /api/agent` is stub).  
 Playbooks: `.cursor/skills/mockoto-scaffold/scenarios.md`. Troubleshooting: `.cursor/skills/mockoto/troubleshooting.md`.
 
-**Published CLI:** `npm run build:cli` copies skills to `dist/apps/mockoto-be/skills/`. Users run `mockoto skills path` or `GET /api/skills`.
+**Published CLI:** `npm run build:cli` copies skills to `dist/apps/mockoto-be/skills/`. Discover them via `GET /api/skills`.
 
 Plan and maintenance notes: `docs/mockoto-agent-skills-plan.md`.
 

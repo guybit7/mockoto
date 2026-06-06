@@ -4,17 +4,37 @@ import fastifyStatic from '@fastify/static';
 import open from 'open';
 import path from 'path';
 import fs from 'fs';
+import os from 'os';
+import { PassThrough } from 'stream';
 
 import { runMigrations } from './app/db/migrate';
 import { registerRoutes } from './app/routes';
 import proxyRoutes from './app/routes/proxy';
-import { resolveSkillsRoot } from './app/utils/skills-path';
 import { ERROR_CODE } from '@mockoto/shared';
 import { ConflictError, NotFoundError, NoActiveCollectionError, ValidationError } from './app/errors';
 
-const host = process.env.HOST ?? 'localhost';
-const port = process.env.PORT ? Number(process.env.PORT) : 3000;
-const proxyPort = process.env.PROXY_PORT ? Number(process.env.PROXY_PORT) : 3001;
+function loadFileConfig(): { port?: number; proxyPort?: number; host?: string } {
+  try {
+    const cfgPath = path.join(os.homedir(), '.mockoto', 'config.json');
+    if (fs.existsSync(cfgPath)) {
+      return JSON.parse(fs.readFileSync(cfgPath, 'utf8'));
+    }
+  } catch {
+    // ignore — fall back to defaults
+  }
+  return {};
+}
+
+const fileCfg = loadFileConfig();
+const host = process.env.HOST ?? fileCfg.host ?? 'localhost';
+const port      = toPort(process.env.PORT,       fileCfg.port,      3000);
+const proxyPort = toPort(process.env.PROXY_PORT, fileCfg.proxyPort, 3001);
+
+function toPort(envVal: string | undefined, fileCfgVal: number | undefined, def: number): number {
+  const fromEnv = envVal ? Number(envVal) : NaN;
+  if (Number.isFinite(fromEnv) && fromEnv > 0) return fromEnv;
+  return fileCfgVal ?? def;
+}
 
 const isProd = (process.env.NODE_ENV ?? 'production') === 'production';
 
@@ -28,6 +48,33 @@ function resolveUiPath() {
     if (fs.existsSync(path.join(p, 'index.html'))) return p;
   }
   return null;
+}
+
+function openLogFile(): fs.WriteStream | null {
+  try {
+    const logDir = path.join(os.homedir(), '.mockoto');
+    fs.mkdirSync(logDir, { recursive: true });
+    const fileStream = fs.createWriteStream(path.join(logDir, 'mockoto.log'), { flags: 'a' });
+    fileStream.on('error', () => { /* log file errors must not crash the server */ });
+    return fileStream;
+  } catch {
+    return null;
+  }
+}
+
+// Suppress EPIPE errors on stdout — happens when stdout is piped to a process that
+// closes early (e.g. `mockoto 2>&1 | head`). Without this, Node.js throws an
+// uncaught 'error' event and crashes the server.
+process.stdout.on('error', (err: NodeJS.ErrnoException) => {
+  if (err.code !== 'EPIPE') throw err;
+});
+
+function makeLogStream(fileStream: fs.WriteStream | null): NodeJS.WritableStream {
+  const tee = new PassThrough();
+  tee.on('error', () => { /* stream errors must not crash the server */ });
+  tee.pipe(process.stdout);
+  if (fileStream) tee.pipe(fileStream, { end: false });
+  return tee;
 }
 
 function makeDomainErrorHandler(log: FastifyInstance['log']) {
@@ -55,16 +102,14 @@ function makeDomainErrorHandler(log: FastifyInstance['log']) {
 }
 
 async function start() {
-  const server = Fastify({ logger: true });
+  const logFile = openLogFile();
+  const server = Fastify({ logger: { stream: makeLogStream(logFile) } });
   server.setErrorHandler(makeDomainErrorHandler(server.log));
 
   const staticPath = resolveUiPath();
   if (isProd && staticPath) {
     server.register(fastifyStatic, { root: staticPath, prefix: '/' });
     server.setNotFoundHandler((_req, reply) => reply.sendFile('index.html'));
-    server.log.info('UI enabled (production mode)');
-  } else {
-    server.log.info('API-only mode (no UI)');
   }
 
   try {
@@ -72,24 +117,17 @@ async function start() {
 
     await registerRoutes(server);
     await server.listen({ port, host });
-    const url = `http://${host}:${port}`;
-    server.log.info(`management server: ${url}`);
 
-    const skillsRoot = resolveSkillsRoot();
-    if (skillsRoot) {
-      server.log.info(`agent skills: ${skillsRoot}`);
-      server.log.info(`agent skills API: ${url}/api/skills`);
-    } else {
-      server.log.info('agent skills: not found');
-    }
+    const url = `http://${host}:${port}`;
+    server.log.info(`Mockoto running at ${url}`);
 
     if (isProd) await open(url);
 
-    const proxyServer = Fastify({ logger: true });
+    const proxyServer = Fastify({ logger: { stream: makeLogStream(logFile) } });
     proxyServer.setErrorHandler(makeDomainErrorHandler(proxyServer.log));
     await proxyServer.register(proxyRoutes);
     await proxyServer.listen({ port: proxyPort, host });
-    server.log.info(`proxy server: http://${host}:${proxyPort}`);
+    server.log.info(`Proxy server running at http://${host}:${proxyPort}`);
   } catch (err) {
     server.log.error(err);
     process.exit(1);

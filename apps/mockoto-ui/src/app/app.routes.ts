@@ -24,5 +24,6 @@ export const appRoutes: Route[] = [
     loadComponent: () =>
       import('./response-viewer/response-viewer.component').then(m => m.ResponseViewerComponent),
   },
+  { path: 'cli', redirectTo: '/home/cli', pathMatch: 'full' },
   { path: '**', redirectTo: 'home' },
 ];

@@ -23,6 +23,11 @@ jobs:
 
       - run: npm ci
 
+      - name: Type Check
+        run: |
+          npx tsc --noEmit -p apps/mockoto-be/tsconfig.app.json
+          npx tsc --noEmit -p apps/mockoto-be/tsconfig.spec.json
+
       - name: Test
         run: npm exec nx -- test mockoto-be
         env:

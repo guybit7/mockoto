@@ -7,10 +7,8 @@ import {
   signal,
 } from '@angular/core';
 import {
-  FlexRenderDirective,
   createAngularTable,
   createColumnHelper,
-  flexRenderComponent,
   getCoreRowModel,
   getFilteredRowModel,
   getPaginationRowModel,
@@ -18,6 +16,13 @@ import {
   type ColumnFiltersState,
   type SortingState,
 } from '@tanstack/angular-table';
+
+declare module '@tanstack/table-core' {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  interface ColumnMeta<TData, TValue> {
+    label?: string;
+  }
+}
 import { ButtonComponent, ErrorStateComponent, LoadingSkeletonComponent } from '@mockoto-ui/design-system';
 import { MkThComponent, MkTextFilterComponent, MkSelectFilterComponent, MkPaginationComponent } from '@mockoto-ui/table';
 import type { Rule } from '@mockoto/shared';
@@ -38,7 +43,6 @@ const col = createColumnHelper<Rule>();
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
-    FlexRenderDirective,
     ButtonComponent,
     ErrorStateComponent,
     LoadingSkeletonComponent,
@@ -85,8 +89,8 @@ const col = createColumnHelper<Rule>();
                 <tr class="border-b border-gray-100 bg-gray-50/50 dark:border-border dark:bg-white/1.5">
                   @for (header of headerGroup.headers; track header.id) {
                     <th [style.width.px]="header.getSize()" class="px-3 py-2 text-left">
-                      @if (!header.isPlaceholder) {
-                        <ng-container *flexRender="header.column.columnDef.header; props: header.getContext()" />
+                      @if (!header.isPlaceholder && header.column.columnDef.meta?.label; as label) {
+                        <mk-th [label]="label" [column]="header.column" />
                       }
                     </th>
                   }
@@ -159,23 +163,27 @@ export class RuleListComponent {
       }),
       col.accessor('requestMethod', {
         id: 'requestMethod',
-        header: (h) => flexRenderComponent(MkThComponent, { inputs: { label: 'Method', column: h.column } }),
+        header: 'Method',
+        meta: { label: 'Method' },
         filterFn: (row, _id, value) => row.original.requestMethod === value,
         size: 85,
       }),
       col.accessor('url', {
-        header: (h) => flexRenderComponent(MkThComponent, { inputs: { label: 'Endpoint', column: h.column } }),
+        header: 'Endpoint',
+        meta: { label: 'Endpoint' },
         filterFn: 'includesString',
       }),
       col.display({
         id: 'passthrough',
-        header: (h) => flexRenderComponent(MkThComponent, { inputs: { label: 'Type', column: h.column } }),
+        header: 'Type',
+        meta: { label: 'Type' },
         size: 80,
         enableSorting: false,
       }),
       col.accessor('isEnabled', {
         id: 'isEnabled',
-        header: (h) => flexRenderComponent(MkThComponent, { inputs: { label: 'Status', column: h.column } }),
+        header: 'Status',
+        meta: { label: 'Status' },
         filterFn: (row, _id, value) => String(row.original.isEnabled) === value,
         size: 110,
         enableSorting: false,
