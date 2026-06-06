@@ -13,7 +13,11 @@
     "test": "vitest run --root apps/mockoto-be",
     "test:watch": "vitest --root apps/mockoto-be",
     "test:coverage": "vitest run --root apps/mockoto-be --coverage",
-    "test:e2e": "tsx scripts/e2e-test.ts"
+    "test:e2e": "tsx scripts/e2e-test.ts",
+    "release:alpha": "npm version prerelease --preid=alpha && git push && git push --tags && npm publish --tag alpha",
+    "release:patch": "npm version patch && git push && git push --tags && npm publish",
+    "release:minor": "npm version minor && git push && git push --tags && npm publish",
+    "release:major": "npm version major && git push && git push --tags && npm publish"
   },
   "bin": {
     "mockoto": "bin/mockoto.js"
