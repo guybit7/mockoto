@@ -16,7 +16,7 @@
     "test:e2e": "tsx scripts/e2e-test.ts"
   },
   "bin": {
-    "mockoto": "./bin/mockoto.js"
+    "mockoto": "bin/mockoto.js"
   },
   "files": [
     "bin/",
