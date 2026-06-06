@@ -13,7 +13,7 @@ import proxyRoutes from './app/routes/proxy';
 import { ERROR_CODE } from '@mockoto/shared';
 import { ConflictError, NotFoundError, NoActiveCollectionError, ValidationError } from './app/errors';
 
-function loadFileConfig(): { port?: number; proxyPort?: number; host?: string } {
+function loadFileConfig(): { port?: number; proxyPort?: number; host?: string; dataDir?: string } {
   try {
     const cfgPath = path.join(os.homedir(), '.mockoto', 'config.json');
     if (fs.existsSync(cfgPath)) {
@@ -29,6 +29,10 @@ const fileCfg = loadFileConfig();
 const host = process.env.HOST ?? fileCfg.host ?? 'localhost';
 const port      = toPort(process.env.PORT,       fileCfg.port,      3000);
 const proxyPort = toPort(process.env.PROXY_PORT, fileCfg.proxyPort, 3001);
+const dataDir   = process.env.MOCKOTO_DATA_DIR ?? fileCfg.dataDir ?? null;
+
+// Expose resolved dataDir for db/index.ts (must be set before db module loads)
+if (dataDir) process.env.MOCKOTO_DATA_DIR = dataDir;
 
 function toPort(envVal: string | undefined, fileCfgVal: number | undefined, def: number): number {
   const fromEnv = envVal ? Number(envVal) : NaN;

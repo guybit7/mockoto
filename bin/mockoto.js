@@ -14,8 +14,9 @@ const readline = require('readline');
 const CONFIG_DIR = path.join(os.homedir(), '.mockoto');
 const CONFIG_FILE = path.join(CONFIG_DIR, 'config.json');
 const LOG_FILE = path.join(CONFIG_DIR, 'mockoto.log');
+const PID_FILE = path.join(CONFIG_DIR, 'mockoto.pid');
 
-const DEFAULT_CONFIG = { port: 3000, proxyPort: 3001, host: 'localhost' };
+const DEFAULT_CONFIG = { port: 3000, proxyPort: 3001, host: 'localhost', dataDir: path.join(os.homedir(), '.mockoto', 'data') };
 
 function loadConfig() {
   try {
@@ -119,12 +120,29 @@ function formatUptime(seconds) {
 
 // ─── Commands ─────────────────────────────────────────────────────────────────
 
-async function cmdStart() {
+async function cmdStart({ detach } = {}) {
   const mainPath = path.resolve(__dirname, '../dist/apps/mockoto-be/main.js');
   if (!fs.existsSync(mainPath)) {
     fatal('Server binary not found — try reinstalling: npm install -g @guybit7/mockoto-cli');
     return;
   }
+
+  if (detach) {
+    const { spawn } = require('child_process');
+    const out = fs.openSync(LOG_FILE, 'a');
+    const child = spawn(process.execPath, [mainPath], {
+      detached: true,
+      stdio: ['ignore', out, out],
+    });
+    child.unref();
+    fs.mkdirSync(CONFIG_DIR, { recursive: true });
+    fs.writeFileSync(PID_FILE, String(child.pid));
+    success(`Mockoto started in background (PID ${child.pid})`);
+    const cfg = loadConfig();
+    detail('URL', `http://${cfg.host}:${cfg.port}`);
+    return;
+  }
+
   try {
     require(mainPath);
   } catch (err) {
@@ -136,6 +154,35 @@ async function cmdStart() {
         `  Or ensure you have Python and a C++ compiler installed (Windows: npm install -g windows-build-tools)`
       );
       return;
+    }
+    throw err;
+  }
+}
+
+async function cmdStop() {
+  if (!fs.existsSync(PID_FILE)) {
+    fail('No running Mockoto instance found (no PID file)');
+    console.log(`   Start with: ${colour(C.bold, 'mockoto --detach')}`);
+    process.exit(1);
+  }
+
+  const pid = parseInt(fs.readFileSync(PID_FILE, 'utf8').trim(), 10);
+  if (!Number.isInteger(pid) || pid <= 0) {
+    fail('PID file is corrupted');
+    fs.unlinkSync(PID_FILE);
+    process.exit(1);
+  }
+
+  try {
+    process.kill(pid, 'SIGTERM');
+    fs.unlinkSync(PID_FILE);
+    success(`Mockoto stopped (PID ${pid})`);
+  } catch (err) {
+    if (err.code === 'ESRCH') {
+      // Process already dead
+      fs.unlinkSync(PID_FILE);
+      fail(`Process ${pid} was not running — cleaned up PID file`);
+      process.exit(1);
     }
     throw err;
   }
@@ -476,6 +523,7 @@ async function cmdConfigShow() {
   detail('Port', cfg.port);
   detail('Proxy port', cfg.proxyPort);
   detail('Host', cfg.host);
+  detail('Data dir', cfg.dataDir);
   blank();
 
   if (fs.existsSync(CONFIG_FILE)) {
@@ -487,7 +535,7 @@ async function cmdConfigShow() {
 }
 
 async function cmdConfigSet(key, value) {
-  const allowed = { port: 'number', proxyPort: 'number', host: 'string' };
+  const allowed = { port: 'number', proxyPort: 'number', host: 'string', dataDir: 'string' };
 
   if (!allowed[key]) {
     blank();
@@ -503,6 +551,20 @@ async function cmdConfigSet(key, value) {
     if (isNaN(parsed) || parsed < 1 || parsed > 65535) {
       fatal(`Invalid port: ${value} — must be a number between 1 and 65535`);
     }
+  }
+
+  if (key === 'dataDir') {
+    const expanded = value.startsWith('~')
+      ? path.join(os.homedir(), value.slice(1))
+      : value;
+    const resolved = path.resolve(expanded);
+    try {
+      fs.mkdirSync(resolved, { recursive: true });
+    } catch {
+      fatal(`Cannot create directory: ${resolved}`);
+      return;
+    }
+    parsed = resolved;
   }
 
   const cfg = loadConfig();
@@ -676,7 +738,13 @@ program
       }
     },
   })
-  .action(cmdStart);
+  .option('-d, --detach', 'Run server in background (terminal stays free)')
+  .action((opts) => cmdStart(opts));
+
+program
+  .command('stop')
+  .description('Stop a background Mockoto server started with --detach')
+  .action(cmdStop);
 
 program
   .command('open')
@@ -727,7 +795,7 @@ config
 config
   .command('set')
   .description('Set a configuration value')
-  .argument('<key>', 'config key (port, proxyPort, host)')
+  .argument('<key>', 'config key (port, proxyPort, host, dataDir)')
   .argument('<value>', 'value to set')
   .action(cmdConfigSet);
 

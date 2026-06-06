@@ -69,6 +69,18 @@ const RAW: RawSection[] = [
         desc: 'Start the Mockoto server and proxy. Run from the directory that contains your data folder.',
       },
       {
+        syntax: 'mockoto --detach',
+        desc: 'Start the Mockoto server in the background — the terminal stays free for other commands. Saves the process ID to ~/.mockoto/mockoto.pid.',
+        note: 'Use mockoto stop to stop the background server',
+        noteType: 'info',
+      },
+      {
+        syntax: 'mockoto stop',
+        desc: 'Stop a background Mockoto server that was started with --detach. Sends SIGTERM to the process and removes the PID file.',
+        note: 'Only works when started with --detach',
+        noteType: 'warning',
+      },
+      {
         syntax: 'mockoto open',
         desc: 'Open the Mockoto UI in your default browser.',
         note: 'Requires server to be running',
@@ -141,6 +153,7 @@ const RAW: RawSection[] = [
           { flag: 'port',      desc: 'Management server port (1–65535). Default: 3000' },
           { flag: 'proxyPort', desc: 'Proxy server port (1–65535). Default: 3001'      },
           { flag: 'host',      desc: 'Bind address. Default: localhost'                 },
+          { flag: 'dataDir',   desc: 'Custom data directory path. Default: ~/.mockoto/data' },
         ],
       },
       {
@@ -160,6 +173,12 @@ const RAW: RawSection[] = [
           { flag: '-n, --lines <n>', desc: 'Number of lines to show (must be ≥ 1). Default: 50'             },
           { flag: '-f, --follow',    desc: 'Follow log output in real time (like tail -f). Ctrl+C to stop.' },
         ],
+      },
+      {
+        syntax: 'mockoto logs clear',
+        desc: 'Delete the Mockoto log file (~/.mockoto/mockoto.log). Useful for freeing disk space or starting a clean log.',
+        note: 'This cannot be undone',
+        noteType: 'danger',
       },
     ],
   },
@@ -201,16 +220,16 @@ const RAW: RawSection[] = [
         <!-- Install strip -->
         <div class="flex items-center gap-3 rounded-xl border border-gray-200 bg-white px-4 py-2.5 dark:border-border dark:bg-surface">
           <span class="select-none font-mono text-xs text-gray-400 dark:text-zinc-600">$</span>
-          <code class="font-mono text-sm text-gray-900 dark:text-zinc-100">npm install -g @guybit7/mockoto</code>
+          <code class="font-mono text-sm text-gray-900 dark:text-zinc-100">npm install -g @guybit7/mockoto-cli</code>
           <button
             type="button"
-            (click)="copy('npm install -g @guybit7/mockoto')"
+            (click)="copy('npm install -g @guybit7/mockoto-cli')"
             class="ml-2 flex h-7 w-7 shrink-0 items-center justify-center rounded-lg text-gray-400 transition-colors
                    hover:bg-gray-100 hover:text-gray-700
                    dark:text-zinc-600 dark:hover:bg-white/5 dark:hover:text-zinc-300"
             aria-label="Copy install command"
           >
-            @if (copied() === 'npm install -g @guybit7/mockoto') {
+            @if (copied() === 'npm install -g @guybit7/mockoto-cli') {
               <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24"
                    fill="none" stroke="currentColor" stroke-width="2.5"
                    stroke-linecap="round" stroke-linejoin="round" class="text-green-400">
