@@ -1,6 +1,6 @@
 import { Component, computed, inject } from '@angular/core';
 import { RouterLink, RouterLinkActive } from '@angular/router';
-import { ThemeService } from '@mockoto-ui/core';
+import { DefaultPageService, ThemeService } from '@mockoto-ui/core';
 
 @Component({
   selector: 'mk-header',
@@ -23,6 +23,24 @@ import { ThemeService } from '@mockoto-ui/core';
 
       <!-- Actions -->
       <div class="flex items-center gap-1">
+
+        <!-- Go to default page — only visible when a default is pinned -->
+        @if (defaultUrl()) {
+          <button
+            type="button"
+            (click)="goToDefault()"
+            title="Go to default page"
+            class="flex h-8 w-8 items-center justify-center rounded-lg text-accent transition-colors hover:bg-accent/10"
+            aria-label="Go to default page"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24"
+                 fill="none" stroke="currentColor" stroke-width="2"
+                 stroke-linecap="round" stroke-linejoin="round">
+              <line x1="12" x2="12" y1="17" y2="22"/><path d="M5 17h14v-1.76a2 2 0 0 0-1.11-1.79l-1.78-.9A2 2 0 0 1 15 10.76V6h1a2 2 0 0 0 0-4H8a2 2 0 0 0 0 4h1v4.76a2 2 0 0 1-1.11 1.79l-1.78.9A2 2 0 0 0 5 15.24Z"/>
+            </svg>
+          </button>
+        }
+
         <a
           routerLink="/home"
           routerLinkActive="!text-accent"
@@ -66,7 +84,12 @@ import { ThemeService } from '@mockoto-ui/core';
   `,
 })
 export class HeaderComponent {
-  private readonly themeService = inject(ThemeService);
-  protected readonly isDark = computed(() => this.themeService.theme() === 'dark');
-  protected toggleTheme(): void { this.themeService.toggle(); }
+  private readonly themeService   = inject(ThemeService);
+  private readonly defaultPageSvc = inject(DefaultPageService);
+
+  protected readonly isDark      = computed(() => this.themeService.theme() === 'dark');
+  protected readonly defaultUrl  = this.defaultPageSvc.pinnedUrl;
+
+  protected toggleTheme():   void { this.themeService.toggle(); }
+  protected goToDefault():   void { this.defaultPageSvc.restoreOnStartup(); }
 }

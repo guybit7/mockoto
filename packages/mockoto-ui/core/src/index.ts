@@ -21,3 +21,4 @@ export { ShortcutService } from './lib/shortcut.service';
 export type { ShortcutContext } from './lib/shortcut.service';
 export { ShortcutAware } from './lib/shortcut-aware';
 export { BasePanelComponent } from './lib/base-panel';
+export { DefaultPageService } from './lib/services/default-page.service';
