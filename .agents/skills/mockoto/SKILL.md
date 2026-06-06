@@ -31,6 +31,7 @@ Proxy: `http://localhost:3001/<projectId>/<path>`
 | HTTP helper, discovery, CRUD matrix | [mockoto-api](../mockoto-api/SKILL.md) | [agent-toolkit.md](../mockoto-api/agent-toolkit.md) |
 | Full end-to-end scenarios (18+) | [mockoto-scaffold](../mockoto-scaffold/SKILL.md) | [scenarios.md](../mockoto-scaffold/scenarios.md) |
 | Switch active collection/response | [mockoto-switching](../mockoto-switching/SKILL.md) | scenarios 5–6 |
+| Start, status, config, backup, logs | [mockoto-cli](../mockoto-cli/SKILL.md) | — |
 | UI routes / panels | [mockoto-ui](../mockoto-ui/SKILL.md) | [navigation.md](../mockoto-ui/navigation.md) |
 | Errors / 503 / double-encoded JSON | [troubleshooting.md](troubleshooting.md) | — |
 | Do/don't for agents | [best-practices.md](best-practices.md) | — |
@@ -45,13 +46,7 @@ Proxy: `http://localhost:3001/<projectId>/<path>`
 
 ## Bundled skills (npm CLI)
 
-Installed via `npm i -g mockoto`, skills ship at `dist/apps/mockoto-be/skills/`:
-
-```bash
-mockoto skills path    # absolute path — symlink or copy into .cursor/skills
-mockoto skills list
-mockoto skills copy    # print cp commands for current project
-```
+Installed via `npm i -g mockoto`, skills ship inside the package at `dist/apps/mockoto-be/skills/`.
 
 HTTP manifest (server running): `GET http://localhost:3000/api/skills`
 

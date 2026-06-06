@@ -21,6 +21,11 @@ import { MockResolver } from '../../app/services/mock-resolver';
 import { RequestForwarder } from '../../app/services/request-forwarder';
 import { ResponseRecorder } from '../../app/services/response-recorder';
 import { ProxyOrchestrator } from '../../app/services/proxy.service';
+import { StatusRepository } from '../../app/repositories/system/status.repository';
+import { ValidateRepository } from '../../app/repositories/system/validate.repository';
+import { StatusService } from '../../app/services/system/status.service';
+import { ValidateService } from '../../app/services/system/validate.service';
+import { SystemController } from '../../app/controllers/system/system.controller';
 import {
   NotFoundError,
   ConflictError,
@@ -50,10 +55,15 @@ function domainErrorHandler(err: Error, _req: FastifyRequest, reply: FastifyRepl
   });
 }
 
-function createInMemoryDb() {
+export function createInMemorySqlite() {
   const sqlite = new Database(':memory:');
   sqlite.pragma('foreign_keys = ON');
   migrateDb(sqlite);
+  return sqlite;
+}
+
+function createInMemoryDb() {
+  const sqlite = createInMemorySqlite();
   return drizzle(sqlite, { schema });
 }
 
@@ -84,6 +94,12 @@ function buildManagementApp(db: DB): FastifyInstance {
       new RuleResponsesService(ruleResponsesRepo),
     );
     await ruleResponsesCtrl.register(api);
+
+    const systemCtrl = new SystemController(
+      new StatusService(new StatusRepository(db), 3000, 3001),
+      new ValidateService(new ValidateRepository(db)),
+    );
+    await systemCtrl.register(api);
   }, { prefix: '/api' });
 
   return app;
@@ -142,7 +158,8 @@ function buildProxyApp(db: DB): FastifyInstance {
 
 /** Returns a management API app backed by a fresh in-memory SQLite database. */
 export function buildTestApp(): FastifyInstance {
-  return buildManagementApp(createInMemoryDb());
+  const sqlite = createInMemorySqlite();
+  return buildManagementApp(drizzle(sqlite, { schema }));
 }
 
 /**
@@ -151,7 +168,8 @@ export function buildTestApp(): FastifyInstance {
  * and then verify proxy behavior.
  */
 export function buildTestAppWithProxy(): { api: FastifyInstance; proxy: FastifyInstance } {
-  const db = createInMemoryDb();
+  const sqlite = createInMemorySqlite();
+  const db = drizzle(sqlite, { schema });
   return {
     api: buildManagementApp(db),
     proxy: buildProxyApp(db),

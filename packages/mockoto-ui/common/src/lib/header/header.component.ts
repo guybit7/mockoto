@@ -1,11 +1,11 @@
 import { Component, computed, inject } from '@angular/core';
-import { RouterLink } from '@angular/router';
+import { RouterLink, RouterLinkActive } from '@angular/router';
 import { ThemeService } from '@mockoto-ui/core';
 
 @Component({
   selector: 'mk-header',
   standalone: true,
-  imports: [RouterLink],
+  imports: [RouterLink, RouterLinkActive],
   template: `
     <header class="flex h-14 shrink-0 items-center justify-between border-b border-gray-200 bg-white/90 px-5 backdrop-blur-md dark:border-border dark:bg-surface/80">
 
@@ -25,11 +25,24 @@ import { ThemeService } from '@mockoto-ui/core';
       <div class="flex items-center gap-1">
         <a
           routerLink="/home"
+          routerLinkActive="!text-accent"
+          [routerLinkActiveOptions]="{ exact: true }"
           class="flex h-8 w-8 items-center justify-center rounded-lg text-gray-500 transition-colors hover:bg-gray-100 hover:text-gray-900 dark:text-zinc-500 dark:hover:bg-surface dark:hover:text-zinc-300"
           aria-label="Home"
         >
           <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/>
+          </svg>
+        </a>
+        <a
+          routerLink="/home/cli"
+          routerLinkActive="!text-accent"
+          [routerLinkActiveOptions]="{ exact: true }"
+          class="flex h-8 w-8 items-center justify-center rounded-lg text-gray-500 transition-colors hover:bg-gray-100 hover:text-gray-900 dark:text-zinc-500 dark:hover:bg-surface dark:hover:text-zinc-300"
+          aria-label="CLI reference"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="4 17 10 11 4 5"/><line x1="12" x2="20" y1="19" y2="19"/>
           </svg>
         </a>
         <button

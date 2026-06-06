@@ -1,4 +1,5 @@
 /// <reference types='vitest' />
+import path from 'path';
 import { defineConfig } from 'vite';
 import { nxViteTsPaths } from '@nx/vite/plugins/nx-tsconfig-paths.plugin';
 
@@ -11,6 +12,9 @@ export default defineConfig(() => ({
     watch: false,
     globals: true,
     environment: 'node',
+    env: {
+      WORKSPACE_ROOT: path.resolve(__dirname, '../..'),
+    },
     include: ['src/**/*.{test,spec}.{js,mjs,cjs,ts,mts,cts}'],
     pool: 'forks',
     reporters: ['default', 'verbose'],

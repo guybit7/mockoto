@@ -5,6 +5,7 @@ import collectionsRoutes from './collections';
 import rulesRoutes from './rules';
 import ruleResponsesRoutes from './rule-responses';
 import skillsRoutes from './skills';
+import systemRoutes from './system';
 
 const apiRoutes = [
   projectsRoutes,
@@ -12,6 +13,7 @@ const apiRoutes = [
   rulesRoutes,
   ruleResponsesRoutes,
   skillsRoutes,
+  systemRoutes,
 ];
 
 export async function registerRoutes(server: FastifyInstance) {

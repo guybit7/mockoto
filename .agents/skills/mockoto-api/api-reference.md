@@ -109,7 +109,6 @@ Full scenarios: [../mockoto-scaffold/scenarios.md](../mockoto-scaffold/scenarios
 | GET | `/skills/:skillName` | `SKILL.md` for package (e.g. `mockoto-api`) |
 | GET | `/skills/:skillName/*` | Other files (e.g. `mockoto-scaffold/scenarios.md`) |
 
-CLI: `mockoto skills path` | `mockoto skills list` | `mockoto skills copy`
 
 ## Agent
 
