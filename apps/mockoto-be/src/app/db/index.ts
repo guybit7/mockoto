@@ -5,7 +5,12 @@ import fs from 'fs';
 import os from 'os';
 import * as schema from './schema';
 
-const dbDir = process.env.MOCKOTO_DATA_DIR ?? path.join(os.homedir(), '.mockoto', 'data');
+const defaultDbDir =
+  process.env.NODE_ENV === 'production'
+    ? path.join(os.homedir(), '.mockoto', 'data')
+    : path.join(process.cwd(), 'apps', 'mockoto-be', 'data');
+
+const dbDir = process.env.MOCKOTO_DATA_DIR ?? defaultDbDir;
 fs.mkdirSync(dbDir, { recursive: true });
 
 const sqlite = new Database(path.join(dbDir, 'mockoto.db'));

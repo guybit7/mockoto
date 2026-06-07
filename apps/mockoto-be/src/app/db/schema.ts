@@ -24,7 +24,7 @@ export const projects = sqliteTable('projects', {
     .notNull()
     .default(false),
 
-  ownerName: text('owner_name'),
+  ownerName: text('owner_name').notNull(),
 
   createdAt: integer('created_at')
     .notNull()

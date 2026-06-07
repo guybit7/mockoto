@@ -8,9 +8,10 @@ const PROJECTS_KEY = ['projects'] as const;
 @Injectable({ providedIn: 'root' })
 export class ProjectsService extends ResourceService {
   projectsQuery() {
-    return injectQuery<Project[]>(() => ({
+    return injectQuery<Project[], Error, Project[]>(() => ({
       queryKey: [...PROJECTS_KEY],
       queryFn:  () => this.fetch<Project[]>('/projects'),
+      select:   (data) => [...data].sort((a, b) => b.createdAt - a.createdAt),
     }));
   }
 
@@ -26,7 +27,12 @@ export class ProjectsService extends ResourceService {
     const client = injectQueryClient();
     return injectMutation<Project, Error, CreateProjectDto>(() => ({
       mutationFn: (dto) => this.create<Project>('/projects', dto),
-      onSuccess:  () => client.invalidateQueries({ queryKey: [...PROJECTS_KEY] }),
+      onSuccess: (created) => {
+        client.setQueryData<Project[]>([...PROJECTS_KEY], (prev) =>
+          prev ? [created, ...prev] : [created],
+        );
+        client.setQueryData([...PROJECTS_KEY, created.id], created);
+      },
     }));
   }
 

@@ -32,7 +32,10 @@ export class CollectionsService extends ResourceService {
         client.setQueryData([...COLLECTIONS_KEY, created.id], created);
         client.setQueriesData<Collection[]>(
           { queryKey: [...COLLECTIONS_KEY, 'by-project'] },
-          (prev) => prev ? [created, ...prev] : [created],
+          // If the new collection is active, mark all others as inactive
+          (prev) => prev
+            ? [created, ...prev.map(c => created.isActive ? { ...c, isActive: false } : c)]
+            : [created],
         );
       },
     }));

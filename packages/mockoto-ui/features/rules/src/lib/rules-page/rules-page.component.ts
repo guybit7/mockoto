@@ -13,7 +13,7 @@ import {
 } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
 import { ActivatedRoute, Router } from '@angular/router';
-import { BreadcrumbContextService, queryViewStatus } from '@mockoto-ui/core';
+import { BreadcrumbContextService, ConfirmDialogService, queryViewStatus } from '@mockoto-ui/core';
 import { ButtonComponent, ErrorStateComponent, LoadingSkeletonComponent, NotFoundStateComponent } from '@mockoto-ui/design-system';
 import { CollectionsService } from '@mockoto-ui/features/collections';
 import { ProjectsService } from '@mockoto-ui/features/projects';
@@ -103,7 +103,7 @@ const SPLIT_PRESETS: readonly SplitPreset[] = [
           />
         }
 
-        <!-- Right: response editor -->
+        <!-- Right: empty state or response editor -->
         @if (selectedRule()) {
           <mk-response-editor
             [rule]="selectedRule()!"
@@ -137,6 +137,7 @@ export class RulesPageComponent {
   private readonly route        = inject(ActivatedRoute);
   private readonly el           = inject(ElementRef<HTMLElement>);
   private readonly breadcrumb   = inject(BreadcrumbContextService);
+  private readonly dialogs      = inject(ConfirmDialogService);
   private readonly colSvc       = inject(CollectionsService);
   private readonly projSvc      = inject(ProjectsService);
   private readonly rulesSvc     = inject(RulesService);
@@ -255,7 +256,12 @@ export class RulesPageComponent {
   }
 
   protected async confirmDelete(id: string): Promise<void> {
-    if (!confirm('Delete this rule and all its responses?')) return;
+    const confirmed = await this.dialogs.confirm({
+      title: 'Delete this rule?',
+      body: 'This will also delete all responses attached to this rule.',
+      confirmLabel: 'Delete',
+    });
+    if (!confirmed) return;
     const wasSelected = this.selectedRuleId() === id;
     await this.deleteMut.mutateAsync(id);
     if (wasSelected) {

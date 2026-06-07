@@ -3,6 +3,7 @@ import { BasePanelComponent, panelEntityStatus } from '@mockoto-ui/core';
 import { FormsModule } from '@angular/forms';
 import { ButtonComponent, InputComponent, PanelQueryGateComponent, SidePanelComponent } from '@mockoto-ui/design-system';
 import { ProjectsService } from '../projects.service';
+import { isValidBaseUrl } from './project-panel.validators';
 
 @Component({
   selector: 'mk-project-panel',
@@ -19,6 +20,7 @@ import { ProjectsService } from '../projects.service';
         (closed)="close()"
       >
       <form (ngSubmit)="save()" class="flex flex-1 flex-col">
+
         <!-- ── Scrollable fields ─────────────────────────────── -->
         <div class="flex flex-1 flex-col gap-4">
           @if (logoUrl()) {
@@ -65,7 +67,8 @@ import { ProjectsService } from '../projects.service';
             label="Owner"
             [value]="ownerName()"
             (valueChange)="ownerName.set($any($event))"
-            placeholder="Optional owner"
+            [error]="ownerNameError()"
+            placeholder="Team or person responsible"
           />
         </div>
 
@@ -73,7 +76,7 @@ import { ProjectsService } from '../projects.service';
         <div class="sticky bottom-0 -mx-5 mt-4 border-t border-gray-100 bg-white px-5 py-3 dark:border-border dark:bg-surface">
           <div class="flex items-center justify-between">
             @if (mode === 'edit') {
-              <mk-button variant="danger" type="button" (click)="delete()">Delete</mk-button>
+              <mk-button variant="danger" type="button" (click)="requestDelete()">Delete</mk-button>
             } @else {
               <span></span>
             }
@@ -101,8 +104,9 @@ export class ProjectPanelComponent extends BasePanelComponent {
   protected readonly logoUrl      = signal('');
   protected readonly description  = signal('');
   protected readonly ownerName    = signal('');
-  protected readonly nameError    = signal('');
-  protected readonly baseUrlError = signal('');
+  protected readonly nameError      = signal('');
+  protected readonly baseUrlError  = signal('');
+  protected readonly ownerNameError = signal('');
 
   protected readonly entityStatus = computed(() =>
     this.mode === 'create' ? 'ready' as const : panelEntityStatus(this.dataQuery),
@@ -123,22 +127,38 @@ export class ProjectPanelComponent extends BasePanelComponent {
     });
   }
 
-  protected override deleteConfirmMessage(): string {
-    return 'Delete this project?';
+  protected override navigateBack(): void {
+    this.router.navigate(['/projects']);
   }
 
+  protected override deleteDialogTitle() { return 'Delete this project?'; }
+  protected override deleteDialogBody()  { return 'This cannot be undone.'; }
+
   protected override isFormDirty(): boolean {
-    if (this.mode === 'create') return !!(this.name() || this.baseUrl());
+    if (this.mode === 'create') return !!(this.name() || this.baseUrl() || this.logoUrl() || this.description() || this.ownerName());
     const data = this.dataQuery.data();
     if (!data) return false;
-    return this.name() !== data.name || this.baseUrl() !== data.baseUrl;
+    return (
+      this.name()        !== data.name                  ||
+      this.baseUrl()     !== data.baseUrl                ||
+      this.logoUrl()     !== (data.logoUrl     ?? '')    ||
+      this.description() !== (data.description ?? '')    ||
+      this.ownerName()   !== (data.ownerName   ?? '')
+    );
   }
 
   protected override validate(): boolean {
     this.nameError.set('');
     this.baseUrlError.set('');
+    this.ownerNameError.set('');
     if (!this.name().trim()) { this.nameError.set('Name is required'); return false; }
-    if (!this.baseUrl().trim()) { this.baseUrlError.set('Base URL is required'); return false; }
+    const rawUrl = this.baseUrl().trim();
+    if (!rawUrl) { this.baseUrlError.set('Base URL is required'); return false; }
+    if (!isValidBaseUrl(rawUrl)) {
+      this.baseUrlError.set('Enter a valid URL (e.g. https://api.example.com or localhost:3000)');
+      return false;
+    }
+    if (!this.ownerName().trim()) { this.ownerNameError.set('Owner is required'); return false; }
     return true;
   }
 
@@ -148,7 +168,7 @@ export class ProjectPanelComponent extends BasePanelComponent {
       baseUrl:     this.baseUrl(),
       logoUrl:     this.logoUrl() || undefined,
       description: this.description() || undefined,
-      ownerName:   this.ownerName() || undefined,
+      ownerName:   this.ownerName(),
       isFavorite:  false,
     };
     if (this.entityId) {
@@ -160,7 +180,6 @@ export class ProjectPanelComponent extends BasePanelComponent {
 
   protected override async doDelete(id: string): Promise<void> {
     await this.deleteMut.mutateAsync(id);
-    this.router.navigate(['/projects']);
   }
 
   protected onImgError(event: Event): void {

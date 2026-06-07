@@ -3,10 +3,11 @@ import { RouterOutlet } from '@angular/router';
 import { HeaderComponent } from '../header/header.component';
 import { BreadcrumbComponent } from '../breadcrumb/breadcrumb.component';
 import { ToastHostComponent } from '../toast/toast-host.component';
+import { ConfirmDialogHostComponent } from '../confirm-dialog/confirm-dialog-host.component';
 
 @Component({
   selector: 'mk-shell',
-  imports: [RouterOutlet, HeaderComponent, BreadcrumbComponent, ToastHostComponent],
+  imports: [RouterOutlet, HeaderComponent, BreadcrumbComponent, ToastHostComponent, ConfirmDialogHostComponent],
   styles: [
     `
       :host-context(.dark) .shell-root {
@@ -30,6 +31,7 @@ import { ToastHostComponent } from '../toast/toast-host.component';
         <router-outlet />
       </main>
       <mk-toast-host />
+      <mk-confirm-dialog-host />
     </div>
   `,
 })

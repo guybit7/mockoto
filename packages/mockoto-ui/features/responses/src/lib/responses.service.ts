@@ -32,7 +32,10 @@ export class ResponsesService extends ResourceService {
         client.setQueryData([...RESPONSES_KEY, created.id], created);
         client.setQueryData<RuleResponse[]>(
           [...RESPONSES_KEY, 'by-rule', created.ruleId],
-          (prev) => prev ? [...prev, created] : [created],
+          // Only deactivate existing responses when the new one is active
+          (prev) => prev
+            ? [...prev.map(r => created.isActive ? { ...r, isActive: false } : r), created]
+            : [created],
         );
       },
     }));

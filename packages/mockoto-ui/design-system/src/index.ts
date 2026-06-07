@@ -1,4 +1,5 @@
 export { ButtonComponent } from './lib/button/button.component';
+export { ConfirmDialogComponent } from './lib/confirm-dialog/confirm-dialog.component';
 export { InputComponent } from './lib/input/input.component';
 export { BadgeComponent } from './lib/badge/badge.component';
 export { ToggleComponent } from './lib/toggle/toggle.component';

@@ -103,32 +103,32 @@ const PASSTHROUGH_OFF = 'bg-gray-100 text-gray-600 dark:bg-zinc-800 dark:text-zi
     <!-- Actions (edit + delete) -->
     <td class="w-[70px] px-3 py-2.5">
       <div class="flex items-center justify-end gap-0.5 opacity-0 transition-opacity duration-150 group-hover:opacity-100">
-        <button
-          type="button"
-          (click)="editClicked.emit(); $event.stopPropagation()"
-          title="Edit rule"
-          aria-label="Edit rule"
-          class="flex h-6 w-6 items-center justify-center rounded text-gray-400 transition-colors hover:bg-gray-100 hover:text-gray-700 dark:text-zinc-600 dark:hover:bg-white/5 dark:hover:text-zinc-300"
-        >
-          <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24"
-               fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-            <path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/><path d="m15 5 4 4"/>
-          </svg>
-        </button>
-        <button
-          type="button"
-          (click)="deleteClicked.emit(); $event.stopPropagation()"
-          [disabled]="deleting()"
-          title="Delete rule"
-          aria-label="Delete rule"
-          class="flex h-6 w-6 items-center justify-center rounded text-gray-400 transition-colors hover:bg-red-50 hover:text-red-500 disabled:cursor-not-allowed disabled:opacity-40 dark:text-zinc-600 dark:hover:bg-red-500/10 dark:hover:text-red-400"
-        >
-          <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24"
-               fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-            <path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/>
-          </svg>
-        </button>
-      </div>
+          <button
+            type="button"
+            (click)="editClicked.emit(); $event.stopPropagation()"
+            title="Edit rule"
+            aria-label="Edit rule"
+            class="flex h-6 w-6 items-center justify-center rounded text-gray-400 transition-colors hover:bg-gray-100 hover:text-gray-700 dark:text-zinc-600 dark:hover:bg-white/5 dark:hover:text-zinc-300"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24"
+                 fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/><path d="m15 5 4 4"/>
+            </svg>
+          </button>
+          <button
+            type="button"
+            (click)="deleteClicked.emit(); $event.stopPropagation()"
+            [disabled]="deleting()"
+            title="Delete rule"
+            aria-label="Delete rule"
+            class="flex h-6 w-6 items-center justify-center rounded text-gray-400 transition-colors hover:bg-red-50 hover:text-red-500 disabled:cursor-not-allowed disabled:opacity-40 dark:text-zinc-600 dark:hover:bg-red-500/10 dark:hover:text-red-400"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24"
+                 fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/>
+            </svg>
+          </button>
+        </div>
     </td>
   `,
 })

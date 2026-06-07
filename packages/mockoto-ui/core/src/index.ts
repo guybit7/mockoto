@@ -7,7 +7,7 @@ export { isNotFound, isConflict, isServerError, getApiErrorBody } from './lib/ht
 export { queryViewStatus, panelEntityStatus, isQueryServerError } from './lib/query-view-status';
 export type { QueryViewStatus, QueryLike } from './lib/query-view-status';
 export { dirtyGuard } from './lib/guards/dirty.guard';
-export type { DirtyComponent } from './lib/guards/dirty.guard';
+export type { HasUnsavedChanges } from './lib/guards/dirty.guard';
 export { BreadcrumbContextService } from './lib/breadcrumb-context.service';
 export type { BreadcrumbContext } from './lib/breadcrumb-context.service';
 export { injectPanelRoute } from './lib/inject-panel-route';
@@ -21,4 +21,6 @@ export { ShortcutService } from './lib/shortcut.service';
 export type { ShortcutContext } from './lib/shortcut.service';
 export { ShortcutAware } from './lib/shortcut-aware';
 export { BasePanelComponent } from './lib/base-panel';
+export { ConfirmDialogService } from './lib/confirm-dialog/confirm-dialog.service';
+export type { ConfirmDialogConfig, ActiveConfirmDialog } from './lib/confirm-dialog/confirm-dialog.service';
 export { DefaultPageService } from './lib/services/default-page.service';

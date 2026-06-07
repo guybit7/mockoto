@@ -147,28 +147,50 @@ interface ShortcutItem<T> {
     <!-- Footer -->
     <div class="flex shrink-0 items-center justify-end gap-1.5 border-t border-gray-100 px-4 py-2 dark:border-border">
       @if (mode() === 'edit') {
-        <mk-button variant="danger" size="sm" type="button" (click)="delete()">
-          <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <polyline points="3 6 5 6 21 6"/>
-            <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/>
-          </svg>
-          Delete
+        @if (deleteConfirming()) {
+          <!-- Inline confirmation -->
+          <span class="mr-auto text-xs text-gray-500 dark:text-zinc-400">Delete this response?</span>
+          <mk-button variant="secondary" size="sm" type="button" (click)="deleteConfirming.set(false)">Cancel</mk-button>
+          <mk-button variant="danger" size="sm" type="button" (click)="delete()">Confirm delete</mk-button>
+        } @else {
+          <mk-button variant="danger" size="sm" type="button" (click)="deleteConfirming.set(true)" class="mr-auto">
+            <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="3 6 5 6 21 6"/>
+              <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/>
+            </svg>
+            Delete
+          </mk-button>
+          <mk-button size="sm" type="button" (click)="save()" [disabled]="saving()">
+            @if (saving()) {
+              <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="animate-spin">
+                <path d="M21 12a9 9 0 1 1-6.219-8.56"/>
+              </svg>
+            } @else {
+              <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/>
+                <polyline points="17 21 17 13 7 13 7 21"/>
+                <polyline points="7 3 7 8 15 8"/>
+              </svg>
+            }
+            {{ saving() ? 'Saving…' : 'Save' }}
+          </mk-button>
+        }
+      } @else {
+        <mk-button size="sm" type="button" (click)="save()" [disabled]="saving()">
+          @if (saving()) {
+            <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="animate-spin">
+              <path d="M21 12a9 9 0 1 1-6.219-8.56"/>
+            </svg>
+          } @else {
+            <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/>
+              <polyline points="17 21 17 13 7 13 7 21"/>
+              <polyline points="7 3 7 8 15 8"/>
+            </svg>
+          }
+          {{ saving() ? 'Saving…' : 'Save' }}
         </mk-button>
       }
-      <mk-button size="sm" type="button" (click)="save()" [disabled]="saving()">
-        @if (saving()) {
-          <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="animate-spin">
-            <path d="M21 12a9 9 0 1 1-6.219-8.56"/>
-          </svg>
-        } @else {
-          <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/>
-            <polyline points="17 21 17 13 7 13 7 21"/>
-            <polyline points="7 3 7 8 15 8"/>
-          </svg>
-        }
-        {{ saving() ? 'Saving…' : 'Save' }}
-      </mk-button>
     </div>
   `,
 })
@@ -209,10 +231,11 @@ export class ResponseInlineFormComponent extends ShortcutAware {
   protected readonly isActive   = linkedSignal<boolean>(() => { this.id(); return false; });
   protected readonly isFavorite = linkedSignal<boolean>(() => { this.id(); return false; });
 
-  protected readonly statusCodeError = signal('');
-  protected readonly bodyError       = signal('');
-  protected readonly payloadError    = signal('');
-  protected readonly saving          = signal(false);
+  protected readonly statusCodeError  = signal('');
+  protected readonly bodyError        = signal('');
+  protected readonly payloadError     = signal('');
+  protected readonly saving           = signal(false);
+  protected readonly deleteConfirming = linkedSignal<boolean>(() => { this.id(); return false; });
 
   private populatedAt = 0;
 
@@ -378,7 +401,12 @@ export class ResponseInlineFormComponent extends ShortcutAware {
 
   protected delete(): void {
     const currentId = this.id();
-    if (!currentId || !confirm('Delete this response?')) return;
+    if (!currentId) return;
+    if (!this.deleteConfirming()) {
+      this.deleteConfirming.set(true);
+      return;
+    }
+    this.deleteConfirming.set(false);
     this.deleteRequested.emit(currentId);
   }
 
