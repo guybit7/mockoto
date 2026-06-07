@@ -15,7 +15,7 @@ describe('Collections CRUD API', () => {
     const res = await app.inject({
       method: 'POST',
       url: PROJECTS,
-      payload: { name: 'Test Project', baseUrl: 'https://api.example.com' },
+      payload: { name: 'Test Project', baseUrl: 'https://api.example.com', ownerName: 'test-team' },
     });
     projectId = res.json().id;
   });
@@ -61,7 +61,7 @@ describe('Collections CRUD API', () => {
     const p2 = await app.inject({
       method: 'POST',
       url: PROJECTS,
-      payload: { name: 'Other Project', baseUrl: 'https://other.example.com' },
+      payload: { name: 'Other Project', baseUrl: 'https://other.example.com', ownerName: 'test-team' },
     }).then((r) => r.json());
 
     await createCollection({ name: 'SharedName' });

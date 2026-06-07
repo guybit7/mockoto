@@ -35,7 +35,7 @@ describe('E2E: Full Mock Flow', () => {
     const createRes = await api.inject({
       method: 'POST',
       url: PROJECTS,
-      payload: { name: 'Lifecycle Project', baseUrl: 'https://lifecycle.example.com' },
+      payload: { name: 'Lifecycle Project', baseUrl: 'https://lifecycle.example.com', ownerName: 'test-team' },
     });
     expect(createRes.statusCode, 'Create project → 201').toBe(201);
     const project = createRes.json();
@@ -66,7 +66,7 @@ describe('E2E: Full Mock Flow', () => {
   it('Scenario 2 — Collection activation: create, activate, switch, delete', async () => {
     const project = await api.inject({
       method: 'POST', url: PROJECTS,
-      payload: { name: 'Activation Scenario', baseUrl: 'https://act-scenario.example.com' },
+      payload: { name: 'Activation Scenario', baseUrl: 'https://act-scenario.example.com', ownerName: 'test-team' },
     }).then((r) => r.json());
 
     const c1 = await api.inject({
@@ -97,7 +97,7 @@ describe('E2E: Full Mock Flow', () => {
   it('Scenario 3 — Rule lifecycle: create, update, disable, delete', async () => {
     const project = await api.inject({
       method: 'POST', url: PROJECTS,
-      payload: { name: 'Rule Lifecycle', baseUrl: 'https://rule-lifecycle.example.com' },
+      payload: { name: 'Rule Lifecycle', baseUrl: 'https://rule-lifecycle.example.com', ownerName: 'test-team' },
     }).then((r) => r.json());
 
     const collection = await api.inject({
@@ -139,7 +139,7 @@ describe('E2E: Full Mock Flow', () => {
   it('Scenario 4 — Response lifecycle: create, activate, switch, delete with promotion', async () => {
     const project = await api.inject({
       method: 'POST', url: PROJECTS,
-      payload: { name: 'Response Lifecycle', baseUrl: 'https://resp-lifecycle.example.com' },
+      payload: { name: 'Response Lifecycle', baseUrl: 'https://resp-lifecycle.example.com', ownerName: 'test-team' },
     }).then((r) => r.json());
 
     const collection = await api.inject({
@@ -179,7 +179,7 @@ describe('E2E: Full Mock Flow', () => {
     // Step 1: Create project
     const project = await api.inject({
       method: 'POST', url: PROJECTS,
-      payload: { name: 'Full Flow Project', baseUrl: 'https://full-flow.example.com' },
+      payload: { name: 'Full Flow Project', baseUrl: 'https://full-flow.example.com', ownerName: 'test-team' },
     }).then((r) => r.json());
 
     // Step 2: Create and activate collection

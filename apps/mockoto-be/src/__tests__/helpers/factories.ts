@@ -21,7 +21,7 @@ export interface ProjectOverrides {
   baseUrl?: string;
   description?: string | null;
   isFavorite?: boolean;
-  ownerName?: string | null;
+  ownerName?: string;
   logoUrl?: string | null;
   logoBase64?: string | null;
 }
@@ -38,7 +38,7 @@ export async function createTestProject(
     baseUrl: overrides.baseUrl ?? `https://${randomUUID().slice(0, 8)}.example.com`,
     description: overrides.description ?? null,
     isFavorite: overrides.isFavorite ?? false,
-    ownerName: overrides.ownerName ?? null,
+    ownerName: overrides.ownerName ?? 'test-team',
     logoUrl: overrides.logoUrl ?? null,
     logoBase64: overrides.logoBase64 ?? null,
     createdAt: t,

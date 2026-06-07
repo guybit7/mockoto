@@ -20,7 +20,7 @@ describe('Projects CRUD API', () => {
     const res = await app.inject({
       method: 'POST',
       url: BASE,
-      payload: { name: 'Test Project', baseUrl: 'https://api.example.com', ...overrides },
+      payload: { name: 'Test Project', baseUrl: 'https://api.example.com', ownerName: 'test-team', ...overrides },
     });
     return { res, body: res.json() };
   }

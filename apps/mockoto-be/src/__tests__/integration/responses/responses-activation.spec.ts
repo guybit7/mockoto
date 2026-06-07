@@ -18,7 +18,7 @@ describe('Rule Response Activation API', () => {
     const project = await app.inject({
       method: 'POST',
       url: PROJECTS,
-      payload: { name: 'Activation Project', baseUrl: 'https://act.example.com' },
+      payload: { name: 'Activation Project', baseUrl: 'https://act.example.com', ownerName: 'test-team' },
     }).then((r) => r.json());
 
     const collection = await app.inject({

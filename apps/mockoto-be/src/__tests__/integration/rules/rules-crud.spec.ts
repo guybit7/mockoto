@@ -18,7 +18,7 @@ describe('Rules CRUD API', () => {
     const project = await app.inject({
       method: 'POST',
       url: PROJECTS,
-      payload: { name: 'Rules Project', baseUrl: 'https://rules.example.com' },
+      payload: { name: 'Rules Project', baseUrl: 'https://rules.example.com', ownerName: 'test-team' },
     }).then((r) => r.json());
     projectId = project.id;
 
