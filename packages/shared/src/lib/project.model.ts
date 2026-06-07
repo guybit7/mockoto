@@ -7,7 +7,7 @@ export const ProjectSchema = BaseEntitySchema.extend({
   logoBase64: z.string().optional(),
   logoUrl: z.string().optional(),
   isFavorite: z.boolean().default(false),
-  ownerName: z.string().optional(),
+  ownerName: z.string().min(1),
 });
 
 export const CreateProjectSchema = z.object({
@@ -17,7 +17,7 @@ export const CreateProjectSchema = z.object({
   logoBase64: z.string().max(2_000_000).optional(),
   logoUrl: z.string().optional(),
   isFavorite: z.boolean().default(false),
-  ownerName: z.string().optional(),
+  ownerName: z.string().min(1),
 });
 
 export const UpdateProjectSchema = z.object({

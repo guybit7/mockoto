@@ -29,7 +29,7 @@ describe('Project Manifest API', () => {
 
   it('should include a readiness warning when there is no active collection', async () => {
     const { body: project } = await app
-      .inject({ method: 'POST', url: PROJECTS, payload: { name: 'P1', baseUrl: 'https://p1.example.com' } })
+      .inject({ method: 'POST', url: PROJECTS, payload: { name: 'P1', baseUrl: 'https://p1.example.com', ownerName: 'test-team' } })
       .then((r) => ({ body: r.json() }));
 
     const res = await app.inject({ method: 'GET', url: `${PROJECTS}/${project.id}/manifest` });
@@ -43,7 +43,7 @@ describe('Project Manifest API', () => {
 
   it('should reflect the active collection and its rules in the manifest', async () => {
     const project = await app
-      .inject({ method: 'POST', url: PROJECTS, payload: { name: 'P2', baseUrl: 'https://p2.example.com' } })
+      .inject({ method: 'POST', url: PROJECTS, payload: { name: 'P2', baseUrl: 'https://p2.example.com', ownerName: 'test-team' } })
       .then((r) => r.json());
 
     const collection = await app
@@ -76,7 +76,7 @@ describe('Project Manifest API', () => {
 
   it('should not warn about a rule when it has an active response', async () => {
     const project = await app
-      .inject({ method: 'POST', url: PROJECTS, payload: { name: 'P3', baseUrl: 'https://p3.example.com' } })
+      .inject({ method: 'POST', url: PROJECTS, payload: { name: 'P3', baseUrl: 'https://p3.example.com', ownerName: 'test-team' } })
       .then((r) => r.json());
 
     const collection = await app

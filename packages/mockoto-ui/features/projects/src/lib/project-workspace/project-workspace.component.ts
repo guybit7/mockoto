@@ -21,9 +21,26 @@ import { ProjectsService } from '../projects.service';
   template: `
     @switch (status()) {
       @case ('loading') {
-        <div class="flex flex-1 flex-col gap-4 p-6">
-          <mk-loading-skeleton [count]="1" rowHeight="h-6" [bordered]="false" />
-          <mk-loading-skeleton [count]="4" rowHeight="h-10" gap="gap-2" [bordered]="false" />
+        <div class="flex min-h-0 flex-1">
+          <!-- Sidebar placeholder matching SidebarComponent dimensions -->
+          <div class="flex w-[220px] shrink-0 flex-col border-r border-gray-200 dark:border-border">
+            <div class="flex h-10 shrink-0 items-center border-b border-gray-100 px-3 dark:border-border">
+              <div class="h-2 w-20 animate-pulse rounded bg-gray-100 dark:bg-white/5"></div>
+            </div>
+            <div class="flex-1 px-1 py-1">
+              @for (w of [70, 52, 83, 64, 76]; track w) {
+                <div class="mx-1 flex h-8 items-center gap-2 rounded-lg px-2">
+                  <div class="h-3 w-3 shrink-0 animate-pulse rounded-sm bg-gray-100 dark:bg-white/5"></div>
+                  <div class="h-2.5 animate-pulse rounded bg-gray-100 dark:bg-white/5" [style.width.%]="w"></div>
+                </div>
+              }
+            </div>
+          </div>
+          <!-- Center content placeholder -->
+          <div class="flex flex-1 flex-col gap-4 p-6">
+            <mk-loading-skeleton [count]="1" rowHeight="h-6" [bordered]="false" />
+            <mk-loading-skeleton [count]="4" rowHeight="h-10" gap="gap-2" [bordered]="false" />
+          </div>
         </div>
       }
       @case ('not-found') {

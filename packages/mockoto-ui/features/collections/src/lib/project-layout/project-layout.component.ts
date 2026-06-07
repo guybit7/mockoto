@@ -14,7 +14,6 @@ import {
   EmptyStateComponent,
   ErrorStateComponent,
   SidebarComponent,
-  SkeletonBlockComponent,
 } from '@mockoto-ui/design-system';
 import { queryViewStatus } from '@mockoto-ui/core';
 import { CollectionsService } from '../collections.service';
@@ -30,7 +29,6 @@ import { CollectionItemComponent } from '../collection-item/collection-item.comp
     EmptyStateComponent,
     ButtonComponent,
     ErrorStateComponent,
-    SkeletonBlockComponent,
   ],
   host: { class: 'flex h-full min-h-0' },
   template: `
@@ -51,13 +49,21 @@ import { CollectionItemComponent } from '../collection-item/collection-item.comp
       <!-- Body slot: collection list -->
       <ng-container mkSidebarBody>
         @if (sidebarStatus() === 'loading') {
-          @for (_ of skeletons; track $index) {
-            <mk-skeleton-block
-              [class]="skeletonItemClass()"
-              r="rounded-lg"
-              [h]="collapsed() ? 'h-7' : 'h-8'"
-              [w]="collapsed() ? 'w-7' : 'w-full'"
-            />
+          @if (collapsed()) {
+            <div class="flex flex-col items-center gap-0.5 px-1 py-0.5">
+              @for (_ of skeletons; track $index) {
+                <div class="h-7 w-7 animate-pulse rounded-lg bg-gray-100 dark:bg-white/5"></div>
+              }
+            </div>
+          } @else {
+            <div class="flex flex-col gap-0.5 px-2 py-0.5">
+              @for (row of skeletons; track $index) {
+                <div class="flex h-8 animate-pulse items-center gap-2 rounded-lg bg-gray-100 px-3 dark:bg-white/5">
+                  <div class="h-3.5 w-3.5 shrink-0 rounded-sm bg-gray-200 dark:bg-white/10"></div>
+                  <div class="h-2.5 rounded bg-gray-200 dark:bg-white/10" [style.width]="row.w"></div>
+                </div>
+              }
+            </div>
           }
         } @else if (sidebarStatus() === 'error') {
           <div class="px-2 py-1">
@@ -150,11 +156,9 @@ export class ProjectLayoutComponent {
   protected readonly collectionsQuery = this.colSvc.collectionsQuery(() => this.projectId());
   protected readonly updateMut        = this.colSvc.updateMutation();
   protected readonly deleteMut        = this.colSvc.deleteMutation();
-  protected readonly skeletons        = Array.from({ length: 5 });
-
-  protected readonly skeletonItemClass = computed(() =>
-    this.collapsed() ? 'mx-auto my-0.5' : 'mx-2 my-0.5'
-  );
+  protected readonly skeletons = [
+    { w: '70%' }, { w: '52%' }, { w: '83%' }, { w: '64%' }, { w: '76%' },
+  ];
 
   protected readonly sidebarStatus = computed(() =>
     queryViewStatus(this.collectionsQuery),

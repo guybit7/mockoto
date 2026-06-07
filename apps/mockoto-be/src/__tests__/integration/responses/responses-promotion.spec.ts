@@ -18,7 +18,7 @@ describe('Rule Response Promotion on Delete', () => {
     const project = await app.inject({
       method: 'POST',
       url: PROJECTS,
-      payload: { name: 'Promotion Project', baseUrl: 'https://promo.example.com' },
+      payload: { name: 'Promotion Project', baseUrl: 'https://promo.example.com', ownerName: 'test-team' },
     }).then((r) => r.json());
 
     const collection = await app.inject({

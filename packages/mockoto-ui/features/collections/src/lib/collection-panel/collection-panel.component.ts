@@ -90,7 +90,7 @@ const SELECT_CLASS = [
         <div class="sticky bottom-0 -mx-5 mt-4 border-t border-gray-100 bg-white px-5 py-3 dark:border-border dark:bg-surface">
           <div class="flex items-center justify-between">
             @if (mode === 'edit') {
-              <mk-button variant="danger" type="button" (click)="delete()">Delete</mk-button>
+              <mk-button variant="danger" type="button" (click)="requestDelete()">Delete</mk-button>
             } @else {
               <span></span>
             }
@@ -151,9 +151,8 @@ export class CollectionPanelComponent extends BasePanelComponent {
     });
   }
 
-  protected override deleteConfirmMessage(): string {
-    return 'Delete this collection and all its rules?';
-  }
+  protected override deleteDialogTitle() { return 'Delete this collection?'; }
+  protected override deleteDialogBody()  { return 'This will also delete all rules and responses in this collection.'; }
 
   protected override isFormDirty(): boolean {
     if (this.mode === 'create') return !!this.name();
@@ -195,8 +194,6 @@ export class CollectionPanelComponent extends BasePanelComponent {
 
   protected override navigateBack(): void {
     if (this.createdId) {
-      // Navigate primary outlet to the new collection's rules
-      // and explicitly close the panel outlet in one go.
       this.router.navigate(
         [{ outlets: { primary: [this.createdId, 'rules'], panel: null } }],
         { relativeTo: this.route.parent },
@@ -208,6 +205,5 @@ export class CollectionPanelComponent extends BasePanelComponent {
 
   protected override async doDelete(id: string): Promise<void> {
     await this.deleteMut.mutateAsync(id);
-    this.navigateBack();
   }
 }

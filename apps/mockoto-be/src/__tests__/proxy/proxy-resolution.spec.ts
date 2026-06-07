@@ -24,7 +24,7 @@ describe('Proxy Resolution', () => {
     const project = await api.inject({
       method: 'POST',
       url: PROJECTS,
-      payload: { name: 'Proxy Test Project', baseUrl: 'https://upstream.example.com' },
+      payload: { name: 'Proxy Test Project', baseUrl: 'https://upstream.example.com', ownerName: 'test-team' },
     }).then((r) => r.json());
     projectId = project.id;
 

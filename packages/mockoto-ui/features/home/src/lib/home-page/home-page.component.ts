@@ -76,17 +76,17 @@ import { ProjectsService } from '@mockoto-ui/features/projects';
               </div>
               <span class="text-sm font-semibold text-zinc-400">mockoto</span>
               <span class="rounded-full border border-indigo-500/30 bg-indigo-500/10 px-2 py-0.5 text-xs font-medium text-indigo-400">
-                AI-powered
+                Autonomous Backend Platform
               </span>
             </div>
 
             <!-- Headline -->
             <div>
               <h1 class="mb-4 text-5xl font-bold leading-[1.1] tracking-tight text-zinc-50">
-                <span class="shimmer-text">Build UI-first.</span>
+                <span class="shimmer-text">AI agents stop at the API boundary.</span>
               </h1>
               <p class="max-w-md text-base leading-relaxed text-zinc-400">
-                Give your AI agent an API it can actually work with.
+                Mockoto gives them the backend they need — instantly. Agents create APIs, simulate behavior, and keep building without waiting for backend implementation.
               </p>
             </div>
 
@@ -222,7 +222,7 @@ DELETE /api/cart/&#123;id&#125;
             <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-accent">
               <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>
             </svg>
-            <span class="text-sm font-medium text-gray-900 dark:text-zinc-100">Why Mockoto?</span>
+            <span class="text-sm font-medium text-gray-900 dark:text-zinc-100">What AI Agents Can Do With Mockoto</span>
           </div>
 
           <div class="grid grid-cols-4 gap-6">
@@ -261,9 +261,9 @@ export class HomePageComponent {
   protected readonly skeletonRows = [1, 2, 3, 4];
 
   protected readonly features = [
-    { n: 1, title: 'Agents get instant responses', desc: 'Zero-latency — no network overhead, no timeouts' },
-    { n: 2, title: 'Agent-powered scaffolding', desc: 'Prompt your agents to generate full rule sets' },
-    { n: 3, title: 'Rule-based matching', desc: 'Match by method, URL pattern, and request body' },
-    { n: 4, title: 'Proxy pass-through', desc: 'Agents forward unmatched requests to real APIs' },
+    { n: 1, title: 'Generate complete backends', desc: 'Agents create full API structures from natural language — no backend team needed' },
+    { n: 2, title: 'Simulate production behavior', desc: 'Realistic responses, status codes, and delays — agents test against real-world conditions' },
+    { n: 3, title: 'Evolve as you build', desc: 'APIs change as requirements change — agents update contracts on the fly' },
+    { n: 4, title: 'Proxy pass-through', desc: 'Unmatched requests forward to real APIs — mockoto fills the gaps, not the whole stack' },
   ];
 }

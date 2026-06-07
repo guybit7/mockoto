@@ -299,7 +299,7 @@ describe('mockoto status + validate (live server)', () => {
     // Seed: project → collection → rule (no responses)
     const projRes = await supertest(app.server)
       .post('/api/projects')
-      .send({ name: 'Validate Test', baseUrl: 'https://validate.test' });
+      .send({ name: 'Validate Test', baseUrl: 'https://validate.test', ownerName: 'test-team' });
     expect(projRes.status).toBe(201);
     const projectId = projRes.body.id;
 

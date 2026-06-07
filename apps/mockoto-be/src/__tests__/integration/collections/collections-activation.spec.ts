@@ -15,7 +15,7 @@ describe('Collections Activation API', () => {
     const res = await app.inject({
       method: 'POST',
       url: PROJECTS,
-      payload: { name: 'Activation Project', baseUrl: 'https://activation.example.com' },
+      payload: { name: 'Activation Project', baseUrl: 'https://activation.example.com', ownerName: 'test-team' },
     });
     projectId = res.json().id;
   });

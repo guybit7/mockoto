@@ -18,7 +18,7 @@ describe('Rule Responses CRUD API', () => {
     const project = await app.inject({
       method: 'POST',
       url: PROJECTS,
-      payload: { name: 'Responses Project', baseUrl: 'https://responses.example.com' },
+      payload: { name: 'Responses Project', baseUrl: 'https://responses.example.com', ownerName: 'test-team' },
     }).then((r) => r.json());
 
     const collection = await app.inject({

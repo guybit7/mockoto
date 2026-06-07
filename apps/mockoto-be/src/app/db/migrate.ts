@@ -15,7 +15,7 @@ export function migrateDb(db: Database): void {
       logo_base64 TEXT,
       logo_url TEXT,
       is_favorite INTEGER NOT NULL DEFAULT 0,
-      owner_name TEXT,
+      owner_name TEXT NOT NULL,
       created_at INTEGER NOT NULL DEFAULT (strftime('%s','now')),
       updated_at INTEGER NOT NULL DEFAULT (strftime('%s','now'))
     );

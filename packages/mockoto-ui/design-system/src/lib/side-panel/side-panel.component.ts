@@ -1,5 +1,5 @@
 import { animate, style, transition, trigger } from '@angular/animations';
-import { Component, input, output } from '@angular/core';
+import { afterNextRender, Component, ElementRef, HostListener, inject, input, output } from '@angular/core';
 
 @Component({
   selector: 'mk-side-panel',
@@ -52,4 +52,20 @@ import { Component, input, output } from '@angular/core';
 export class SidePanelComponent {
   readonly title = input('');
   readonly closed = output<void>();
+
+  private readonly el = inject<ElementRef<HTMLElement>>(ElementRef);
+
+  constructor() {
+    afterNextRender(() => {
+      const first = this.el.nativeElement.querySelector<HTMLElement>(
+        'input:not([disabled]):not([type="hidden"]), select:not([disabled]), textarea:not([disabled])',
+      );
+      first?.focus();
+    });
+  }
+
+  @HostListener('document:keydown.escape')
+  protected onEscape(): void {
+    this.closed.emit();
+  }
 }

@@ -42,7 +42,7 @@ export class ProjectsService {
       logoBase64: row.logoBase64 ?? undefined,
       logoUrl: row.logoUrl ?? undefined,
       isFavorite: row.isFavorite,
-      ownerName: row.ownerName ?? undefined,
+      ownerName: row.ownerName,
     };
   }
 
@@ -74,7 +74,7 @@ export class ProjectsService {
       logoBase64: data.logoBase64 ?? null,
       logoUrl: data.logoUrl ?? null,
       isFavorite: data.isFavorite ?? false,
-      ownerName: data.ownerName ?? null,
+      ownerName: data.ownerName,
       createdAt: now,
       updatedAt: now,
     });

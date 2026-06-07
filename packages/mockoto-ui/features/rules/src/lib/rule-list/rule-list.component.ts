@@ -23,7 +23,7 @@ declare module '@tanstack/table-core' {
     label?: string;
   }
 }
-import { ButtonComponent, ErrorStateComponent, LoadingSkeletonComponent } from '@mockoto-ui/design-system';
+import { ButtonComponent, ErrorStateComponent } from '@mockoto-ui/design-system';
 import { MkThComponent, MkTextFilterComponent, MkSelectFilterComponent, MkPaginationComponent } from '@mockoto-ui/table';
 import type { Rule } from '@mockoto/shared';
 import { RuleItemComponent } from '../rule-item/rule-item.component';
@@ -45,7 +45,6 @@ const col = createColumnHelper<Rule>();
   imports: [
     ButtonComponent,
     ErrorStateComponent,
-    LoadingSkeletonComponent,
     MkThComponent,
     MkTextFilterComponent,
     MkSelectFilterComponent,
@@ -67,7 +66,56 @@ const col = createColumnHelper<Rule>();
     </div>
 
     @if (loading()) {
-      <mk-loading-skeleton [count]="8" rowHeight="h-9" gap="gap-2" [bordered]="false" [inset]="true" />
+      <!-- Filter toolbar skeleton -->
+      <div class="mb-2.5 flex items-center gap-1.5">
+        <div class="h-7 w-36 animate-pulse rounded-lg bg-gray-100 dark:bg-white/5"></div>
+        <div class="h-7 w-28 animate-pulse rounded-lg bg-gray-100 dark:bg-white/5"></div>
+        <div class="h-7 w-28 animate-pulse rounded-lg bg-gray-100 dark:bg-white/5"></div>
+      </div>
+
+      <!-- Table skeleton -->
+      <div class="overflow-hidden rounded-xl border border-gray-200 dark:border-border">
+        <table class="w-full">
+          <thead>
+            <tr class="border-b border-gray-100 bg-gray-50/50 dark:border-border dark:bg-white/[0.015]">
+              <th class="w-[44px] px-3 py-2.5"></th>
+              <th class="w-[85px] px-3 py-2.5 text-left"><div class="h-2 w-10 animate-pulse rounded bg-gray-200 dark:bg-white/[0.06]"></div></th>
+              <th class="px-3 py-2.5 text-left"><div class="h-2 w-16 animate-pulse rounded bg-gray-200 dark:bg-white/[0.06]"></div></th>
+              <th class="w-[80px] px-3 py-2.5 text-left"><div class="h-2 w-8 animate-pulse rounded bg-gray-200 dark:bg-white/[0.06]"></div></th>
+              <th class="w-[110px] px-3 py-2.5 text-left"><div class="h-2 w-12 animate-pulse rounded bg-gray-200 dark:bg-white/[0.06]"></div></th>
+              <th class="w-[70px]"></th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-gray-100/70 bg-white dark:divide-border/60 dark:bg-surface">
+            @for (row of skeletonRows; track row.delay) {
+              <tr [style.animation-delay]="row.delay">
+                <td class="w-[44px] px-3 py-2.5">
+                  <div class="mx-auto h-3.5 w-3.5 animate-pulse rounded-sm bg-gray-100 dark:bg-white/[0.04]" [style.animation-delay]="row.delay"></div>
+                </td>
+                <td class="w-[85px] px-3 py-2.5">
+                  <div class="h-[18px] animate-pulse rounded" [style.width.px]="row.methodW" [style.animation-delay]="row.delay" [class]="row.methodCls"></div>
+                </td>
+                <td class="px-3 py-2.5">
+                  <div class="h-[13px] animate-pulse rounded bg-gray-100 dark:bg-white/[0.05]" [style.width]="row.urlW" [style.animation-delay]="row.delay"></div>
+                  @if (row.hasDesc) {
+                    <div class="mt-1 h-2 w-20 animate-pulse rounded bg-gray-100 dark:bg-white/[0.03]" [style.animation-delay]="row.delay"></div>
+                  }
+                </td>
+                <td class="w-[80px] px-3 py-2.5">
+                  <div class="h-[18px] w-11 animate-pulse rounded bg-gray-100 dark:bg-white/[0.04]" [style.animation-delay]="row.delay"></div>
+                </td>
+                <td class="w-[110px] px-3 py-2.5">
+                  <div class="flex items-center gap-1.5">
+                    <div class="h-1.5 w-1.5 animate-pulse rounded-full" [style.animation-delay]="row.delay" [class]="row.green ? 'bg-emerald-300 dark:bg-emerald-500/40' : 'bg-gray-200 dark:bg-white/[0.06]'"></div>
+                    <div class="h-2 w-12 animate-pulse rounded bg-gray-100 dark:bg-white/[0.04]" [style.animation-delay]="row.delay"></div>
+                  </div>
+                </td>
+                <td class="w-[70px]"></td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
     } @else if (error()) {
       <mk-error-state message="Failed to load rules." />
     } @else {
@@ -100,8 +148,9 @@ const col = createColumnHelper<Rule>();
             <tbody class="divide-y divide-gray-100/70 bg-white dark:divide-border/60 dark:bg-surface">
               @if (tableRows().length === 0) {
                 <tr>
-                  <td colspan="6" class="px-4 py-14 text-center text-sm text-gray-400 dark:text-zinc-600">
-                    No rules yet
+                  <td colspan="6" class="px-4 py-14 text-center">
+                    <p class="text-sm text-gray-400 dark:text-zinc-600">No rules yet</p>
+                    <p class="mt-1 text-xs text-gray-400 dark:text-zinc-600">Click <span class="font-medium text-gray-500 dark:text-zinc-500">New Rule</span> above to create one</p>
                   </td>
                 </tr>
               } @else {
@@ -213,4 +262,15 @@ export class RuleListComponent {
   protected readonly tableRows      = computed(() => this.table.getRowModel().rows);
   protected readonly headerGroups   = computed(() => this.table.getHeaderGroups());
   protected readonly showPagination = computed(() => this.table.getPageCount() > 1);
+
+  protected readonly skeletonRows = [
+    { delay: '0ms',   methodW: 30, methodCls: 'bg-emerald-50 dark:bg-emerald-500/10', urlW: '56%', hasDesc: false, green: true  },
+    { delay: '50ms',  methodW: 38, methodCls: 'bg-blue-50 dark:bg-blue-500/10',       urlW: '71%', hasDesc: true,  green: true  },
+    { delay: '100ms', methodW: 46, methodCls: 'bg-red-50 dark:bg-red-500/10',         urlW: '44%', hasDesc: false, green: false },
+    { delay: '150ms', methodW: 30, methodCls: 'bg-emerald-50 dark:bg-emerald-500/10', urlW: '79%', hasDesc: false, green: true  },
+    { delay: '200ms', methodW: 43, methodCls: 'bg-amber-50 dark:bg-amber-500/10',     urlW: '62%', hasDesc: true,  green: false },
+    { delay: '250ms', methodW: 38, methodCls: 'bg-blue-50 dark:bg-blue-500/10',       urlW: '51%', hasDesc: false, green: true  },
+    { delay: '300ms', methodW: 55, methodCls: 'bg-orange-50 dark:bg-orange-500/10',   urlW: '73%', hasDesc: true,  green: true  },
+    { delay: '350ms', methodW: 30, methodCls: 'bg-emerald-50 dark:bg-emerald-500/10', urlW: '67%', hasDesc: false, green: false },
+  ];
 }
