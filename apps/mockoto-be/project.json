@@ -81,10 +81,7 @@
     "db:seed": {
       "executor": "nx:run-commands",
       "options": {
-        "command": "node -r @swc-node/register apps/mockoto-be/src/app/db/seed.ts",
-        "env": {
-          "NODE_ENV": "development"
-        }
+        "command": "node -r @swc-node/register apps/mockoto-be/src/app/db/seed.ts"
       }
     },
     "db:generate": {
@@ -136,10 +133,7 @@
       },
       "configurations": {
         "development": {
-          "buildTarget": "mockoto-be:build:development",
-          "env": {
-            "NODE_ENV": "development"
-          }
+          "buildTarget": "mockoto-be:build:development"
         },
         "production": {
           "buildTarget": "mockoto-be:build:production"

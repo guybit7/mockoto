@@ -15,9 +15,20 @@ import { DefaultPageService, ThemeService } from '@mockoto-ui/core';
         class="flex items-center gap-2.5 rounded-lg transition-opacity hover:opacity-80"
         aria-label="Go to projects"
       >
-        <div class="flex h-7 w-7 select-none items-center justify-center rounded-lg bg-accent text-xs font-semibold text-white">
-          mk
-        </div>
+        <svg viewBox="0 0 48 48" fill="none" class="h-7 w-7 shrink-0 select-none" xmlns="http://www.w3.org/2000/svg">
+          <g stroke="#7070EC" stroke-width="2.6" stroke-linecap="round">
+            <line x1="7" y1="7" x2="7" y2="41"/>
+            <line x1="7" y1="7" x2="24" y2="28"/>
+            <line x1="41" y1="7" x2="24" y2="28"/>
+            <line x1="41" y1="7" x2="41" y2="41"/>
+          </g>
+          <line x1="7" y1="41" x2="41" y2="41" stroke="#7070EC" stroke-width="1.4" stroke-linecap="round" stroke-opacity="0.22"/>
+          <circle cx="7" cy="7" r="3.5" fill="#7070EC"/>
+          <circle cx="7" cy="41" r="3.5" fill="#7070EC"/>
+          <circle cx="24" cy="28" r="5" fill="#9A9AFA"/>
+          <circle cx="41" cy="7" r="3.5" fill="#7070EC"/>
+          <circle cx="41" cy="41" r="3.5" fill="#7070EC"/>
+        </svg>
         <span class="text-sm font-semibold tracking-tight text-gray-900 dark:text-zinc-100">mockoto</span>
       </a>
 

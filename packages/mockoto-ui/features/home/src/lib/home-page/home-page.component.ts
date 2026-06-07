@@ -47,12 +47,12 @@ import { ProjectsService } from '@mockoto-ui/features/projects';
   ],
   template: `
     <div class="mx-auto max-w-[1400px] px-6 py-8">
-      <div class="grid grid-cols-3 gap-4" style="grid-template-rows: auto auto">
+      <div class="grid grid-cols-3 gap-4">
 
         <!-- ─── Hero (dark, 2/3) ──────────────────────────────────────────── -->
         <div
           class="card-in col-span-2 relative overflow-hidden rounded-2xl bg-gray-950 p-8"
-          style="animation-delay: 0ms; min-height: 340px"
+          style="animation-delay: 0ms; min-height: 380px"
         >
           <!-- Animated orbs -->
           <div class="blob-a pointer-events-none absolute -left-24 -top-24 h-96 w-96 rounded-full"
@@ -71,9 +71,20 @@ import { ProjectsService } from '@mockoto-ui/features/projects';
           <div class="relative z-10 flex h-full flex-col gap-7">
             <!-- Logo mark + badge -->
             <div class="flex items-center gap-3">
-              <div class="flex h-9 w-9 items-center justify-center rounded-xl bg-indigo-500 text-sm font-bold text-white shadow-lg shadow-indigo-500/40">
-                mk
-              </div>
+              <svg viewBox="0 0 48 48" fill="none" class="h-9 w-9 shrink-0" xmlns="http://www.w3.org/2000/svg">
+                <g stroke="#7070EC" stroke-width="2.6" stroke-linecap="round">
+                  <line x1="7" y1="7" x2="7" y2="41"/>
+                  <line x1="7" y1="7" x2="24" y2="28"/>
+                  <line x1="41" y1="7" x2="24" y2="28"/>
+                  <line x1="41" y1="7" x2="41" y2="41"/>
+                </g>
+                <line x1="7" y1="41" x2="41" y2="41" stroke="#7070EC" stroke-width="1.4" stroke-linecap="round" stroke-opacity="0.22"/>
+                <circle cx="7" cy="7" r="3.5" fill="#7070EC"/>
+                <circle cx="7" cy="41" r="3.5" fill="#7070EC"/>
+                <circle cx="24" cy="28" r="5" fill="#9A9AFA"/>
+                <circle cx="41" cy="7" r="3.5" fill="#7070EC"/>
+                <circle cx="41" cy="41" r="3.5" fill="#7070EC"/>
+              </svg>
               <span class="text-sm font-semibold text-zinc-400">mockoto</span>
               <span class="rounded-full border border-indigo-500/30 bg-indigo-500/10 px-2 py-0.5 text-xs font-medium text-indigo-400">
                 Autonomous Backend Platform
@@ -82,11 +93,11 @@ import { ProjectsService } from '@mockoto-ui/features/projects';
 
             <!-- Headline -->
             <div>
-              <h1 class="mb-4 text-5xl font-bold leading-[1.1] tracking-tight text-zinc-50">
-                <span class="shimmer-text">AI agents stop at the API boundary.</span>
+              <h1 class="mb-3 text-4xl font-bold leading-[1.1] tracking-tight text-zinc-50">
+                <span class="shimmer-text">The Autonomous Backend Platform for AI Coding Agents</span>
               </h1>
-              <p class="max-w-md text-base leading-relaxed text-zinc-400">
-                Mockoto gives them the backend they need — instantly. Agents create APIs, simulate behavior, and keep building without waiting for backend implementation.
+              <p class="max-w-lg text-base leading-relaxed text-zinc-400">
+                Agents get a real-time backend they fully control — simulate any response, switch between behaviors, and cover every edge case without building a server. No wasted tokens. Full power from the first prompt.
               </p>
             </div>
 
@@ -161,7 +172,7 @@ DELETE /api/cart/&#123;id&#125;
             </a>
           </div>
 
-          <div class="flex-1 divide-y divide-gray-50 dark:divide-white/[0.03]">
+          <div class="flex-1 divide-y divide-gray-50 dark:divide-white/3">
             @if (projectsQuery.isPending()) {
               @for (i of skeletonRows; track i) {
                 <div class="flex items-center gap-3 px-5 py-3.5">
@@ -213,7 +224,7 @@ DELETE /api/cart/&#123;id&#125;
           </div>
         </div>
 
-        <!-- ─── Why Mockoto (full width) ──────────────────────────────────── -->
+        <!-- ─── What AI Agents Can Do (full width) ────────────────────────── -->
         <div
           class="card-in col-span-3 rounded-2xl border border-gray-100 bg-white p-6 dark:border-border dark:bg-surface"
           style="animation-delay: 160ms"
@@ -225,25 +236,116 @@ DELETE /api/cart/&#123;id&#125;
             <span class="text-sm font-medium text-gray-900 dark:text-zinc-100">What AI Agents Can Do With Mockoto</span>
           </div>
 
-          <div class="grid grid-cols-4 gap-6">
+          <div class="grid grid-cols-4 gap-x-6 gap-y-4">
             @for (f of features; track f.title) {
-              <div class="flex items-start gap-3">
-                <div class="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-accent/10 text-xs font-bold text-accent">
-                  {{ f.n }}
-                </div>
-                <div>
-                  <p class="text-xs font-medium text-gray-700 dark:text-zinc-300">{{ f.title }}</p>
-                  <p class="text-xs leading-relaxed text-gray-400 dark:text-zinc-600">{{ f.desc }}</p>
-                </div>
+              <div class="flex items-start gap-2.5">
+                <span class="mt-0.5 shrink-0 text-base leading-none">⚡</span>
+                <p class="text-xs leading-relaxed text-gray-600 dark:text-zinc-400">{{ f.title }}</p>
               </div>
             }
           </div>
+        </div>
 
-          <!-- Proxy URL -->
-          <div class="mt-6 inline-flex items-center gap-3 rounded-lg bg-gray-50 px-4 py-2.5 dark:bg-white/[0.03]">
-            <p class="text-xs font-medium text-gray-500 dark:text-zinc-500">Proxy URL</p>
-            <p class="font-mono text-xs text-accent">http://localhost:3333/proxy/&lt;baseUrl&gt;</p>
+        <!-- ─── Response Control (full width) ──────────────────────────────── -->
+        <div
+          class="card-in col-span-3 relative overflow-hidden rounded-2xl border border-gray-100 bg-white p-6 dark:border-border dark:bg-surface"
+          style="animation-delay: 200ms"
+        >
+          <div class="grid grid-cols-2 gap-8">
+            <div>
+              <div class="mb-3 flex items-center gap-2">
+                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-accent">
+                  <path d="M3 3h6l6 18h6"/><path d="M14 3h7"/>
+                </svg>
+                <span class="text-sm font-medium text-gray-900 dark:text-zinc-100">Response Control</span>
+              </div>
+              <p class="mb-3 text-xs leading-relaxed text-gray-500 dark:text-zinc-500">
+                AI agents can switch between response behaviors at any time — simulating different backend states, edge cases, and data sets without touching real infrastructure.
+              </p>
+              <p class="text-xs leading-relaxed text-gray-500 dark:text-zinc-500">
+                The UI responds instantly, so agents can validate behavior across success states, error flows, and empty states — saving time and tokens before a real backend exists.
+              </p>
+            </div>
+            <div class="flex flex-col gap-2.5">
+              @for (s of responseModes; track s.label) {
+                <div class="flex items-center gap-3 rounded-lg border border-gray-100 bg-gray-50 px-4 py-2.5 dark:border-border dark:bg-white/2">
+                  <div class="h-2 w-2 shrink-0 rounded-full" [style.background]="s.color"></div>
+                  <span class="text-xs font-medium text-gray-700 dark:text-zinc-300">{{ s.label }}</span>
+                  <span class="ml-auto text-xs text-gray-400 dark:text-zinc-600">{{ s.desc }}</span>
+                </div>
+              }
+            </div>
           </div>
+        </div>
+
+        <!-- ─── From Idea to Working Application (1/3) ───────────────────── -->
+        <div
+          class="card-in rounded-2xl border border-gray-100 bg-white p-6 dark:border-border dark:bg-surface"
+          style="animation-delay: 220ms"
+        >
+          <p class="mb-5 text-sm font-medium text-gray-900 dark:text-zinc-100">From Idea to Working Application</p>
+          <div class="flex flex-col gap-0">
+            @for (step of flowSteps; track step; let last = $last) {
+              <div class="flex items-center gap-3">
+                <div class="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-accent/10 text-xs font-semibold text-accent">
+                  {{ $index + 1 }}
+                </div>
+                <span class="text-sm text-gray-700 dark:text-zinc-300">{{ step }}</span>
+              </div>
+              @if (!last) {
+                <div class="ml-3.5 h-4 w-px bg-gray-100 dark:bg-white/6"></div>
+              }
+            }
+          </div>
+        </div>
+
+        <!-- ─── Not a Mock Server (1/3) ──────────────────────────────────── -->
+        <div
+          class="card-in rounded-2xl border border-gray-100 bg-white p-6 dark:border-border dark:bg-surface"
+          style="animation-delay: 280ms"
+        >
+          <div class="mb-3 flex items-center gap-2">
+            <div class="flex h-6 w-6 shrink-0 items-center justify-center rounded-md border border-gray-200 dark:border-border">
+              <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-gray-400 dark:text-zinc-500">
+                <circle cx="12" cy="12" r="10"/><path d="M12 8v4"/><path d="M12 16h.01"/>
+              </svg>
+            </div>
+            <span class="text-sm font-medium text-gray-900 dark:text-zinc-100">Not a Mock Server</span>
+          </div>
+          <p class="mb-3 text-xs leading-relaxed text-gray-500 dark:text-zinc-500">
+            Mockoto is not another API mocking tool. It is a programmable backend environment designed for autonomous software development.
+          </p>
+          <p class="text-xs leading-relaxed text-gray-500 dark:text-zinc-500">
+            A backend layer that AI agents can create, modify, and control as they build software.
+          </p>
+        </div>
+
+        <!-- ─── Vision (1/3) ─────────────────────────────────────────────── -->
+        <div
+          class="card-in relative overflow-hidden rounded-2xl bg-gray-950 p-6"
+          style="animation-delay: 340ms"
+        >
+          <div class="blob-b pointer-events-none absolute -right-16 -top-16 h-48 w-48 rounded-full"
+               style="background: radial-gradient(circle, rgba(99,102,241,0.28) 0%, transparent 65%)"></div>
+          <div class="relative z-10">
+            <p class="mb-3 text-sm font-medium text-zinc-300">Vision</p>
+            <p class="mb-2 text-xs leading-relaxed text-zinc-500">
+              AI agents start with Mockoto — building the backend first, saving time and tokens before a single line of real infrastructure exists.
+            </p>
+            <p class="text-xs leading-relaxed text-zinc-600">
+              Mockoto is the infrastructure that makes autonomous development possible.
+            </p>
+          </div>
+        </div>
+
+        <!-- ─── Tagline (full width) ──────────────────────────────────────── -->
+        <div
+          class="card-in col-span-3 flex items-center justify-center rounded-2xl border border-gray-100 bg-white px-8 py-6 dark:border-border dark:bg-surface"
+          style="animation-delay: 400ms"
+        >
+          <p class="text-center text-sm text-gray-500 dark:text-zinc-500">
+            Mockoto gives AI coding agents a backend they can build themselves.
+          </p>
         </div>
 
       </div>
@@ -261,9 +363,29 @@ export class HomePageComponent {
   protected readonly skeletonRows = [1, 2, 3, 4];
 
   protected readonly features = [
-    { n: 1, title: 'Generate complete backends', desc: 'Agents create full API structures from natural language — no backend team needed' },
-    { n: 2, title: 'Simulate production behavior', desc: 'Realistic responses, status codes, and delays — agents test against real-world conditions' },
-    { n: 3, title: 'Evolve as you build', desc: 'APIs change as requirements change — agents update contracts on the fly' },
-    { n: 4, title: 'Proxy pass-through', desc: 'Unmatched requests forward to real APIs — mockoto fills the gaps, not the whole stack' },
+    { title: 'Generate complete application backends from natural language' },
+    { title: 'Create and manage APIs autonomously' },
+    { title: 'Simulate production-grade backend behavior' },
+    { title: 'Maintain stateful application data' },
+    { title: 'Generate realistic domain models and datasets' },
+    { title: 'Test frontend integrations instantly' },
+    { title: 'Evolve APIs as requirements change' },
+    { title: 'Build and validate entire applications independently' },
+    { title: 'Switch between response behaviors to simulate any backend state on demand' },
+  ];
+
+  protected readonly responseModes = [
+    { label: 'Happy path',   desc: 'All requests succeed with realistic data', color: '#34d399' },
+    { label: 'Error state',  desc: '500 / 404 responses to test error handling', color: '#f87171' },
+    { label: 'Empty state',  desc: 'Empty collections and null fields',          color: '#94a3b8' },
+    { label: 'Edge case',    desc: 'Boundary data, timeouts, slow responses',    color: '#fb923c' },
+  ];
+
+  protected readonly flowSteps = [
+    'Product Idea',
+    'AI Coding Agent',
+    'Mockoto',
+    'Virtual Backend',
+    'Working Application',
   ];
 }
