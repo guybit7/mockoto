@@ -156,12 +156,12 @@ DELETE /api/cart/&#123;id&#125;
 
         <!-- ─── Projects (1/3) ────────────────────────────────────────────── -->
         <div
-          class="card-in flex flex-col overflow-hidden rounded-2xl border border-gray-100 bg-white dark:border-border dark:bg-surface"
-          style="animation-delay: 80ms"
+          class="card-in flex flex-col overflow-hidden rounded-2xl bg-gray-950"
+          style="animation-delay: 80ms; border: 1px solid rgba(255,255,255,0.07)"
         >
-          <div class="flex items-center justify-between border-b border-gray-100 px-5 py-4 dark:border-border">
-            <span class="text-sm font-medium text-gray-900 dark:text-zinc-100">Projects</span>
-            <a routerLink="/projects" class="flex items-center gap-1 text-xs text-gray-400 transition-colors hover:text-accent dark:text-zinc-600 dark:hover:text-accent">
+          <div class="flex items-center justify-between px-5 py-4" style="border-bottom: 1px solid rgba(255,255,255,0.07)">
+            <span class="text-sm font-medium text-zinc-200">Projects</span>
+            <a routerLink="/projects" class="flex items-center gap-1 text-xs text-zinc-600 transition-colors hover:text-accent">
               All
               <svg xmlns="http://www.w3.org/2000/svg" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
                 <path d="m9 18 6-6-6-6"/>
@@ -169,41 +169,42 @@ DELETE /api/cart/&#123;id&#125;
             </a>
           </div>
 
-          <div class="flex-1 divide-y divide-gray-50 dark:divide-white/3">
+          <div class="flex-1" style="divide-color: rgba(255,255,255,0.05)">
             @if (projectsQuery.isPending()) {
               @for (i of skeletonRows; track i) {
-                <div class="flex items-center gap-3 px-5 py-3.5">
-                  <div class="h-8 w-8 animate-pulse rounded-lg bg-gray-100 dark:bg-white/5"></div>
+                <div class="flex items-center gap-3 px-5 py-3.5" style="border-bottom: 1px solid rgba(255,255,255,0.04)">
+                  <div class="h-8 w-8 animate-pulse rounded-lg bg-white/6"></div>
                   <div class="flex-1 space-y-1.5">
-                    <div class="h-3 w-28 animate-pulse rounded bg-gray-100 dark:bg-white/5"></div>
-                    <div class="h-2.5 w-36 animate-pulse rounded bg-gray-100 dark:bg-white/5"></div>
+                    <div class="h-3 w-28 animate-pulse rounded bg-white/6"></div>
+                    <div class="h-2.5 w-36 animate-pulse rounded bg-white/4"></div>
                   </div>
                 </div>
               }
             } @else if (recentProjects().length === 0) {
               <div class="flex flex-col items-center px-5 py-10 text-center">
-                <div class="mb-3 flex h-10 w-10 items-center justify-center rounded-xl border border-dashed border-gray-200 dark:border-border">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="text-gray-300 dark:text-zinc-700">
+                <div class="mb-3 flex h-10 w-10 items-center justify-center rounded-xl border border-dashed border-white/10">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="text-zinc-700">
                     <path d="M20 20a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L9.6 3.9A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2Z"/>
                   </svg>
                 </div>
-                <p class="text-xs text-gray-400 dark:text-zinc-600">No projects yet</p>
+                <p class="text-xs text-zinc-600">No projects yet</p>
                 <a [routerLink]="['/projects', { outlets: { panel: ['new'] } }]" class="mt-2 text-xs text-accent hover:underline">Create your first →</a>
               </div>
             } @else {
               @for (project of recentProjects(); track project.id) {
                 <a
                   [routerLink]="['/projects', project.id, 'collections']"
-                  class="group flex items-center gap-3 px-5 py-3.5 transition-colors hover:bg-gray-50 dark:hover:bg-white/4"
+                  class="group flex items-center gap-3 px-5 py-3.5 transition-colors hover:bg-white/4"
+                  style="border-bottom: 1px solid rgba(255,255,255,0.04)"
                 >
-                  <div class="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-accent/10 text-xs font-bold text-accent">
+                  <div class="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-accent/15 text-xs font-bold text-accent">
                     {{ project.name.charAt(0).toUpperCase() }}
                   </div>
                   <div class="min-w-0 flex-1">
-                    <p class="truncate text-sm font-medium text-gray-900 dark:text-zinc-100">{{ project.name }}</p>
-                    <p class="truncate font-mono text-xs text-gray-400 dark:text-zinc-600">{{ project.baseUrl }}</p>
+                    <p class="truncate text-sm font-medium text-zinc-200">{{ project.name }}</p>
+                    <p class="truncate font-mono text-xs text-zinc-600">{{ project.baseUrl }}</p>
                   </div>
-                  <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="shrink-0 text-gray-300 opacity-0 transition-opacity group-hover:opacity-100 dark:text-zinc-700">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="shrink-0 text-zinc-700 opacity-0 transition-opacity group-hover:opacity-100">
                     <path d="m9 18 6-6-6-6"/>
                   </svg>
                 </a>
@@ -211,8 +212,8 @@ DELETE /api/cart/&#123;id&#125;
             }
           </div>
 
-          <div class="border-t border-gray-100 px-5 py-3 dark:border-border">
-            <a [routerLink]="['/projects', { outlets: { panel: ['new'] } }]" class="flex items-center gap-2 text-xs text-gray-400 transition-colors hover:text-accent dark:text-zinc-600 dark:hover:text-accent">
+          <div class="px-5 py-3" style="border-top: 1px solid rgba(255,255,255,0.07)">
+            <a [routerLink]="['/projects', { outlets: { panel: ['new'] } }]" class="flex items-center gap-2 text-xs text-zinc-600 transition-colors hover:text-accent">
               <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
                 <path d="M5 12h14"/><path d="M12 5v14"/>
               </svg>
@@ -223,60 +224,32 @@ DELETE /api/cart/&#123;id&#125;
 
         <!-- ─── What AI Agents Can Do (full width) ────────────────────────── -->
         <div
-          class="card-in col-span-3 rounded-2xl border border-gray-100 bg-white p-6 dark:border-border dark:bg-surface"
+          class="card-in col-span-3 relative overflow-hidden rounded-2xl bg-gray-950"
           style="animation-delay: 160ms"
         >
-          <div class="mb-5 flex items-center gap-2">
-            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-accent">
-              <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>
-            </svg>
-            <span class="text-base font-semibold text-gray-900 dark:text-zinc-100">What AI Agents Can Do With Mockoto</span>
-          </div>
+          <!-- Blob orbs -->
+          <div class="blob-b pointer-events-none absolute right-1/3 top-0 h-56 w-56 translate-x-1/2 rounded-full opacity-50"
+               style="background: radial-gradient(circle, rgba(99,102,241,0.2) 0%, transparent 70%)"></div>
+          <div class="blob-a pointer-events-none absolute left-1/4 bottom-0 h-48 w-48 -translate-x-1/2 rounded-full opacity-40"
+               style="background: radial-gradient(circle, rgba(139,92,246,0.18) 0%, transparent 70%)"></div>
+          <!-- Top border glow -->
+          <div class="pointer-events-none absolute inset-x-0 top-0 h-px"
+               style="background: linear-gradient(90deg, transparent 0%, rgba(99,102,241,0.5) 40%, rgba(139,92,246,0.5) 60%, transparent 100%)"></div>
 
-          <div class="grid grid-cols-3 gap-x-6 gap-y-4">
-            @for (f of features; track f.title) {
-              <div class="flex items-start gap-2.5">
-                <span class="mt-0.5 shrink-0 text-base leading-none">⚡</span>
-                <p class="text-sm leading-relaxed text-gray-600 dark:text-zinc-400">{{ f.title }}</p>
-              </div>
-            }
-          </div>
-        </div>
-
-        <!-- ─── Response Control (full width) ──────────────────────────────── -->
-        <div
-          class="card-in col-span-3 relative overflow-hidden rounded-2xl border border-gray-100 bg-white p-6 dark:border-border dark:bg-surface"
-          style="animation-delay: 200ms"
-        >
-          <div class="grid grid-cols-2 gap-8">
-            <div>
-              <div class="mb-3 flex items-center gap-2">
-                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-accent">
-                  <path d="M3 3h6l6 18h6"/><path d="M14 3h7"/>
-                </svg>
-                <span class="text-base font-semibold text-gray-900 dark:text-zinc-100">Response Control</span>
-              </div>
-              <p class="text-sm leading-relaxed text-gray-500 dark:text-zinc-500">
-                Switch between response behaviors at any time — happy path, errors, empty states, edge cases. No infrastructure changes. The AI agent always gets exactly what you configured.
-              </p>
+          <div class="relative z-10 p-6">
+            <div class="mb-5 flex items-center gap-2">
+              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-indigo-400">
+                <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>
+              </svg>
+              <span class="text-base font-semibold text-zinc-200">What AI Agents Can Do With Mockoto</span>
             </div>
-            <div class="flex flex-col gap-2.5">
-              @if (projectsQuery.isPending()) {
-                @for (i of [1,2,3,4,5]; track i) {
-                  <div class="flex items-center gap-3 rounded-lg border border-gray-100 bg-gray-50 px-4 py-2.5 dark:border-border dark:bg-white/2">
-                    <div class="h-2 w-2 shrink-0 animate-pulse rounded-full bg-gray-200 dark:bg-white/10"></div>
-                    <div class="h-3 w-20 animate-pulse rounded bg-gray-100 dark:bg-white/6"></div>
-                    <div class="ml-auto h-3 w-36 animate-pulse rounded bg-gray-100 dark:bg-white/6"></div>
-                  </div>
-                }
-              } @else {
-                @for (s of responseModes; track s.label) {
-                  <div class="flex items-center gap-3 rounded-lg border border-gray-100 bg-gray-50 px-4 py-2.5 dark:border-border dark:bg-white/2">
-                    <div class="h-2 w-2 shrink-0 rounded-full" [style.background]="s.color"></div>
-                    <span class="text-sm font-medium text-gray-700 dark:text-zinc-300">{{ s.label }}</span>
-                    <span class="ml-auto text-sm text-gray-400 dark:text-zinc-600">{{ s.desc }}</span>
-                  </div>
-                }
+
+            <div class="grid grid-cols-3 gap-x-6 gap-y-3">
+              @for (f of features; track f.title) {
+                <div class="flex items-start gap-3 rounded-xl border p-4" style="border-color: rgba(255,255,255,0.07); background: rgba(255,255,255,0.03)">
+                  <span class="mt-0.5 shrink-0 text-base leading-none">⚡</span>
+                  <p class="text-sm leading-relaxed text-zinc-400">{{ f.title }}</p>
+                </div>
               }
             </div>
           </div>
@@ -463,66 +436,126 @@ DELETE /api/cart/&#123;id&#125;
           </div>
         </div>
 
+        <!-- ─── Response Control (full width) ──────────────────────────────── -->
+        <div
+          class="card-in col-span-3 relative overflow-hidden rounded-2xl bg-gray-950"
+          style="animation-delay: 200ms"
+        >
+          <!-- Blob orbs -->
+          <div class="blob-a pointer-events-none absolute left-1/3 top-0 h-56 w-56 -translate-x-1/2 rounded-full opacity-50"
+               style="background: radial-gradient(circle, rgba(52,211,153,0.15) 0%, transparent 70%)"></div>
+          <div class="blob-b pointer-events-none absolute right-1/4 bottom-0 h-48 w-48 translate-x-1/2 rounded-full opacity-40"
+               style="background: radial-gradient(circle, rgba(99,102,241,0.15) 0%, transparent 70%)"></div>
+          <!-- Top border glow -->
+          <div class="pointer-events-none absolute inset-x-0 top-0 h-px"
+               style="background: linear-gradient(90deg, transparent 0%, rgba(52,211,153,0.4) 30%, rgba(99,102,241,0.4) 70%, transparent 100%)"></div>
+
+          <div class="relative z-10 p-6">
+            <div class="grid grid-cols-2 gap-8">
+              <div>
+                <div class="mb-3 flex items-center gap-2">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-indigo-400">
+                    <path d="M3 3h6l6 18h6"/><path d="M14 3h7"/>
+                  </svg>
+                  <span class="text-base font-semibold text-zinc-200">Response Control</span>
+                </div>
+                <p class="text-sm leading-relaxed text-zinc-500">
+                  Switch between response behaviors at any time — happy path, errors, empty states, edge cases. No infrastructure changes. The AI agent always gets exactly what you configured.
+                </p>
+              </div>
+              <div class="flex flex-col gap-2.5">
+                @if (projectsQuery.isPending()) {
+                  @for (i of [1,2,3,4,5]; track i) {
+                    <div class="flex items-center gap-3 rounded-lg border px-4 py-2.5" style="border-color: rgba(255,255,255,0.07); background: rgba(255,255,255,0.03)">
+                      <div class="h-2 w-2 shrink-0 animate-pulse rounded-full bg-white/10"></div>
+                      <div class="h-3 w-20 animate-pulse rounded bg-white/7"></div>
+                      <div class="ml-auto h-3 w-36 animate-pulse rounded bg-white/5"></div>
+                    </div>
+                  }
+                } @else {
+                  @for (s of responseModes; track s.label) {
+                    <div class="flex items-center gap-3 rounded-lg border px-4 py-2.5" style="border-color: rgba(255,255,255,0.07); background: rgba(255,255,255,0.03)">
+                      <div class="h-2 w-2 shrink-0 rounded-full" [style.background]="s.color"></div>
+                      <span class="text-sm font-medium text-zinc-300">{{ s.label }}</span>
+                      <span class="ml-auto text-sm text-zinc-600">{{ s.desc }}</span>
+                    </div>
+                  }
+                }
+              </div>
+            </div>
+          </div>
+        </div>
+
         <!-- ─── Traffic Recording (full width) ──────────────────────────── -->
         <div
-          class="card-in col-span-3 overflow-hidden rounded-2xl border border-gray-100 bg-white dark:border-border dark:bg-surface"
+          class="card-in col-span-3 relative overflow-hidden rounded-2xl bg-gray-950"
           style="animation-delay: 320ms"
         >
+          <!-- Blob orbs -->
+          <div class="blob-a pointer-events-none absolute left-1/2 top-0 h-56 w-56 -translate-x-1/2 rounded-full opacity-40"
+               style="background: radial-gradient(circle, rgba(248,113,113,0.15) 0%, transparent 70%)"></div>
+          <div class="blob-b pointer-events-none absolute right-0 bottom-0 h-48 w-48 translate-x-1/4 rounded-full opacity-40"
+               style="background: radial-gradient(circle, rgba(99,102,241,0.15) 0%, transparent 70%)"></div>
+          <!-- Top border glow -->
+          <div class="pointer-events-none absolute inset-x-0 top-0 h-px"
+               style="background: linear-gradient(90deg, transparent 0%, rgba(248,113,113,0.4) 30%, rgba(99,102,241,0.4) 70%, transparent 100%)"></div>
+
+          <div class="relative z-10">
           <!-- Header -->
-          <div class="flex items-center justify-between border-b border-gray-100 px-6 py-4 dark:border-border">
+          <div class="flex items-center justify-between px-6 py-4" style="border-bottom: 1px solid rgba(255,255,255,0.07)">
             <div class="flex items-center gap-2">
-              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-accent">
+              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-indigo-400">
                 <circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="3"/><line x1="12" y1="2" x2="12" y2="5"/><line x1="12" y1="19" x2="12" y2="22"/>
               </svg>
-              <span class="text-base font-semibold text-gray-900 dark:text-zinc-100">Traffic Recording</span>
+              <span class="text-base font-semibold text-zinc-200">Traffic Recording</span>
               <span class="rounded-full bg-accent/10 px-2 py-0.5 text-xs font-medium text-accent">auto-capture</span>
             </div>
-            <p class="text-sm text-gray-400 dark:text-zinc-500">Point your agent at the proxy — Mockoto captures real responses automatically</p>
+            <p class="text-sm text-zinc-500">Point your agent at the proxy — Mockoto captures real responses automatically</p>
           </div>
 
-          <div class="grid grid-cols-2 divide-x divide-gray-100 dark:divide-border">
+          <div class="grid grid-cols-2" style="border-color: rgba(255,255,255,0.07)">
 
             <!-- Left: Flow diagram -->
-            <div class="p-6">
-              <p class="mb-5 text-xs font-medium uppercase tracking-wider text-gray-400 dark:text-zinc-600">How recording works</p>
+            <div class="p-6" style="border-right: 1px solid rgba(255,255,255,0.07)">
+              <p class="mb-5 text-xs font-medium uppercase tracking-wider text-zinc-600">How recording works</p>
 
               <!-- Step 1 -->
               <div class="flex items-start gap-3">
                 <div class="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-accent/10 text-xs font-semibold text-accent">1</div>
                 <div class="flex-1 pb-4">
-                  <p class="text-sm font-medium text-gray-700 dark:text-zinc-300">Agent calls the proxy</p>
-                  <div class="mt-1.5 flex items-center gap-2 rounded-lg bg-gray-50 px-3 py-2 dark:bg-white/4">
-                    <code class="font-mono text-xs text-gray-500 dark:text-zinc-500">proxy:3001/<span class="text-accent">&#123;projectId&#125;</span>/api/users</code>
+                  <p class="text-sm font-medium text-zinc-300">Agent calls the proxy</p>
+                  <div class="mt-1.5 flex items-center gap-2 rounded-lg px-3 py-2" style="background: rgba(255,255,255,0.04)">
+                    <code class="font-mono text-xs text-zinc-500">proxy:3001/<span class="text-accent">&#123;projectId&#125;</span>/api/users</code>
                   </div>
                 </div>
               </div>
-              <div class="ml-3 mb-1 h-4 w-px bg-gray-100 dark:bg-white/6"></div>
+              <div class="ml-3 mb-1 h-4 w-px bg-white/6"></div>
 
               <!-- Step 2 -->
               <div class="flex items-start gap-3">
-                <div class="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-gray-100 text-xs font-semibold text-gray-500 dark:bg-white/6 dark:text-zinc-500">2</div>
+                <div class="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-white/6 text-xs font-semibold text-zinc-500">2</div>
                 <div class="flex-1 pb-4">
-                  <p class="text-sm font-medium text-gray-700 dark:text-zinc-300">No rule? Forwarded to the real server</p>
-                  <div class="mt-1.5 flex items-center gap-2 rounded-lg bg-gray-50 px-3 py-2 dark:bg-white/4">
+                  <p class="text-sm font-medium text-zinc-300">No rule? Forwarded to the real server</p>
+                  <div class="mt-1.5 flex items-center gap-2 rounded-lg px-3 py-2" style="background: rgba(255,255,255,0.04)">
                     <div class="flex items-center gap-1.5">
                       <div class="h-1.5 w-1.5 rounded-full bg-amber-400"></div>
-                      <code class="font-mono text-xs text-gray-500 dark:text-zinc-500">GET https://api.yourserver.com/users</code>
+                      <code class="font-mono text-xs text-zinc-500">GET https://api.yourserver.com/users</code>
                     </div>
                   </div>
                 </div>
               </div>
-              <div class="ml-3 mb-1 h-4 w-px bg-gray-100 dark:bg-white/6"></div>
+              <div class="ml-3 mb-1 h-4 w-px bg-white/6"></div>
 
               <!-- Step 3 -->
               <div class="flex items-start gap-3">
-                <div class="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-emerald-50 text-xs font-semibold text-emerald-600 dark:bg-emerald-500/10 dark:text-emerald-400">3</div>
+                <div class="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-emerald-500/10 text-xs font-semibold text-emerald-400">3</div>
                 <div class="flex-1">
-                  <p class="text-sm font-medium text-gray-700 dark:text-zinc-300">Real response captured as a rule</p>
-                  <div class="mt-1.5 flex items-center gap-2 rounded-lg bg-emerald-50 px-3 py-2 dark:bg-emerald-500/8">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="shrink-0 text-emerald-500">
+                  <p class="text-sm font-medium text-zinc-300">Real response captured as a rule</p>
+                  <div class="mt-1.5 flex items-center gap-2 rounded-lg px-3 py-2" style="background: rgba(52,211,153,0.08)">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="shrink-0 text-emerald-400">
                       <polyline points="20 6 9 17 4 12"/>
                     </svg>
-                    <span class="text-sm text-emerald-700 dark:text-emerald-400">Rule + response saved automatically · agent gets the real data back</span>
+                    <span class="text-sm text-emerald-400">Rule + response saved automatically · agent gets the real data back</span>
                   </div>
                 </div>
               </div>
@@ -530,19 +563,20 @@ DELETE /api/cart/&#123;id&#125;
 
             <!-- Right: Recording strategies -->
             <div class="p-6">
-              <p class="mb-5 text-xs font-medium uppercase tracking-wider text-gray-400 dark:text-zinc-600">Recording strategy (per collection)</p>
+              <p class="mb-5 text-xs font-medium uppercase tracking-wider text-zinc-600">Recording strategy (per collection)</p>
               <div class="flex flex-col gap-2.5">
                 @for (s of recordingStrategies; track s.label) {
-                  <div class="flex items-start gap-3 rounded-xl border border-gray-100 px-4 py-3 dark:border-border">
+                  <div class="flex items-start gap-3 rounded-xl border px-4 py-3" style="border-color: rgba(255,255,255,0.07); background: rgba(255,255,255,0.03)">
                     <div class="mt-0.5 h-2 w-2 shrink-0 rounded-full" [style.background]="s.color"></div>
                     <div>
-                      <p class="text-sm font-medium text-gray-700 dark:text-zinc-300">{{ s.label }}</p>
-                      <p class="mt-0.5 text-sm text-gray-400 dark:text-zinc-600">{{ s.desc }}</p>
+                      <p class="text-sm font-medium text-zinc-300">{{ s.label }}</p>
+                      <p class="mt-0.5 text-sm text-zinc-600">{{ s.desc }}</p>
                     </div>
                   </div>
                 }
               </div>
             </div>
+          </div>
           </div>
         </div>
 
