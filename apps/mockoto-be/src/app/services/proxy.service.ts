@@ -88,10 +88,13 @@ export class ProxyOrchestrator {
         const headers: Record<string, string> = { 'content-type': 'application/json' };
         if (response.headers) {
           try {
-            const stored = JSON.parse(response.headers);
-            delete stored['content-encoding'];
-            delete stored['content-length'];
-            Object.assign(headers, stored);
+            // Lowercase the keys so a stored "Content-Type" replaces the default
+            // instead of being sent alongside it.
+            const stored: Record<string, string> = JSON.parse(response.headers);
+            for (const [key, value] of Object.entries(stored)) {
+              const name = key.toLowerCase();
+              if (name !== 'content-encoding' && name !== 'content-length') headers[name] = value;
+            }
           } catch { /* use stored defaults */ }
         }
         // TODO: replace with applyTemplate(response.body, req.body) once UI toggle is ready.

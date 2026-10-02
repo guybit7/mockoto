@@ -248,6 +248,63 @@ describe('Proxy Resolution', () => {
     expect(res.headers['x-custom-header'], 'Custom header propagated').toBe('my-value');
   });
 
+  // ── Content types ─────────────────────────────────────────────────────────────
+
+  it('should default to application/json when no content type is stored', async () => {
+    await createRuleWithResponse({ url: '/api/json', method: 'GET', body: { ok: true } });
+
+    const res = await proxyRequest({ path: '/api/json' });
+    expect(res.headers['content-type'], 'Default content type').toContain('application/json');
+    expect(res.json()).toEqual({ ok: true });
+  });
+
+  it('should serve a plain-text body verbatim with its content type', async () => {
+    await createRuleWithResponse({
+      url: '/api/health',
+      method: 'GET',
+      body: 'OK',
+      headers: { 'content-type': 'text/plain' },
+    });
+
+    const res = await proxyRequest({ path: '/api/health' });
+    expect(res.headers['content-type'], 'Stored content type served').toContain('text/plain');
+    expect(res.body, 'Text body is not JSON-quoted').toBe('OK');
+  });
+
+  it('should serve an XML body verbatim', async () => {
+    const xml = '<?xml version="1.0"?>\n<user id="1"><name>Alice</name></user>';
+    await createRuleWithResponse({
+      url: '/api/user.xml',
+      method: 'GET',
+      body: xml,
+      headers: { 'content-type': 'application/xml' },
+    });
+
+    const res = await proxyRequest({ path: '/api/user.xml' });
+    expect(res.headers['content-type']).toContain('application/xml');
+    expect(res.body).toBe(xml);
+  });
+
+  it('should let a mixed-case Content-Type header replace the default', async () => {
+    await createRuleWithResponse({
+      url: '/api/mixed-case',
+      method: 'GET',
+      body: 'hello',
+      headers: { 'Content-Type': 'text/plain' },
+    });
+
+    const res = await proxyRequest({ path: '/api/mixed-case' });
+    expect(res.headers['content-type'], 'Single content type, not json + text').toBe('text/plain');
+    expect(res.body).toBe('hello');
+  });
+
+  it('should keep JSON-quoting a string body when the content type is JSON', async () => {
+    await createRuleWithResponse({ url: '/api/json-string', method: 'GET', body: 'hello' });
+
+    const res = await proxyRequest({ path: '/api/json-string' });
+    expect(res.body, 'A JSON string document').toBe('"hello"');
+  });
+
   // ── Active response switching ─────────────────────────────────────────────────
 
   it('should serve the currently active response', async () => {

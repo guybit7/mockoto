@@ -27,6 +27,7 @@ interface RespDef {
   isActive?: boolean;
   isError?: boolean;
   latency?: number;
+  headers?: Record<string, string>;
   body: string;
 }
 
@@ -114,6 +115,15 @@ const DEFS: ProjDef[] = [
             responses: [
               { name: 'Recent Sessions', statusCode: 200, isActive: true, latency: 90, body: list([{ sessionId: 'sess_001', status: 'completed' }, { sessionId: 'sess_002', status: 'pending' }]) },
               { name: 'Empty', statusCode: 200, latency: 40, body: list([]) },
+            ],
+          },
+          {
+            // Non-JSON responses: the body is stored raw and served with its content type.
+            url: '/checkout/health', method: 'GET', description: 'Health check (plain text, XML, HTML)',
+            responses: [
+              { name: 'OK (text)', statusCode: 200, isActive: true, latency: 10, headers: { 'content-type': 'text/plain' }, body: 'OK' },
+              { name: 'Status (XML)', statusCode: 200, latency: 15, headers: { 'content-type': 'application/xml' }, body: '<?xml version="1.0"?>\n<health>\n  <status>ok</status>\n  <version>1.4.2</version>\n</health>' },
+              { name: 'Maintenance (HTML)', statusCode: 503, isError: true, latency: 20, headers: { 'content-type': 'text/html' }, body: '<!doctype html>\n<html>\n  <body>\n    <h1>Down for maintenance</h1>\n  </body>\n</html>' },
             ],
           },
         ],
@@ -1552,6 +1562,7 @@ for (const proj of DEFS) {
           isError: resp.isError ?? false,
           latency: resp.latency ?? 50,
           isFavorite: false,
+          headers: resp.headers ? j(resp.headers) : null,
           body: resp.body,
           createdAt: ts(),
           updatedAt: ts(),

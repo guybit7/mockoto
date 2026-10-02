@@ -109,6 +109,111 @@ describe('Rule Responses CRUD API', () => {
     expect(body.body).toEqual({ result: 'ok' });
   });
 
+  it('should return a non-JSON body as the raw string', async () => {
+    const { body } = await createResponse({
+      headers: { 'content-type': 'text/plain' },
+      body: '42',
+    });
+    expect(body.body, 'Text body is not parsed as JSON').toBe('42');
+
+    const get = await app.inject({ method: 'GET', url: `${BASE}/${body.id}` });
+    expect(get.json().body).toBe('42');
+  });
+
+  it('should keep a text body raw when only the body is updated', async () => {
+    const { body: created } = await createResponse({
+      headers: { 'content-type': 'text/html' },
+      body: '<p>one</p>',
+    });
+
+    const res = await app.inject({
+      method: 'PATCH',
+      url: `${BASE}/${created.id}`,
+      payload: { body: '<p>two</p>' },
+    });
+    expect(res.json().body, 'Uses the stored content type').toBe('<p>two</p>');
+    expect(res.json().headers).toEqual({ 'content-type': 'text/html' });
+  });
+
+  it('should reject changing the content type after creation', async () => {
+    const { body: created } = await createResponse({ body: 'hello' });
+
+    const res = await app.inject({
+      method: 'PATCH',
+      url: `${BASE}/${created.id}`,
+      payload: { headers: { 'content-type': 'text/plain' } },
+    });
+    expect(res.statusCode, 'JSON → text is rejected').toBe(400);
+
+    const get = await app.inject({ method: 'GET', url: `${BASE}/${created.id}` });
+    expect(get.json().body, 'Stored body is untouched').toBe('hello');
+  });
+
+  it('should reject a headers update that drops a non-JSON content type', async () => {
+    const { body: created } = await createResponse({
+      headers: { 'content-type': 'text/plain' },
+      body: 'OK',
+    });
+
+    const res = await app.inject({
+      method: 'PATCH',
+      url: `${BASE}/${created.id}`,
+      payload: { headers: { 'x-extra': '1' } },
+    });
+    expect(res.statusCode, 'Missing content type means JSON → rejected').toBe(400);
+  });
+
+  it('should allow a headers update that keeps the same content type', async () => {
+    const { body: created } = await createResponse({
+      headers: { 'content-type': 'text/plain' },
+      body: 'OK',
+    });
+
+    const res = await app.inject({
+      method: 'PATCH',
+      url: `${BASE}/${created.id}`,
+      payload: { headers: { 'Content-Type': 'text/plain; charset=utf-8', 'x-extra': '1' } },
+    });
+    expect(res.statusCode).toBe(200);
+    expect(res.json().body).toBe('OK');
+  });
+
+  it('should keep the body when a header unrelated to the content type changes', async () => {
+    const { body: created } = await createResponse({ body: { ok: true } });
+
+    const res = await app.inject({
+      method: 'PATCH',
+      url: `${BASE}/${created.id}`,
+      payload: { headers: { 'x-extra': '1' } },
+    });
+    expect(res.json().body).toEqual({ ok: true });
+  });
+
+  it('should clear the body when updated with null', async () => {
+    const { body: created } = await createResponse({ body: { ok: true } });
+
+    const res = await app.inject({
+      method: 'PATCH',
+      url: `${BASE}/${created.id}`,
+      payload: { body: null },
+    });
+    expect(res.json().body, 'Body is removed').toBeUndefined();
+  });
+
+  it('should clear a text body when updated with an empty string', async () => {
+    const { body: created } = await createResponse({
+      headers: { 'content-type': 'text/plain' },
+      body: 'OK',
+    });
+
+    const res = await app.inject({
+      method: 'PATCH',
+      url: `${BASE}/${created.id}`,
+      payload: { body: '' },
+    });
+    expect(res.json().body, 'Empty body is stored').toBeUndefined();
+  });
+
   // ── Read ──────────────────────────────────────────────────────────────────────
 
   it('should retrieve a response by id', async () => {
