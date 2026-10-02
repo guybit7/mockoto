@@ -1,0 +1,8 @@
+// Cloudflare Workers config for the mockoto.com static site (apps/mockoto-web)
+{
+  "name": "mockoto",
+  "compatibility_date": "2026-10-01",
+  "assets": {
+    "directory": "./dist/apps/mockoto-web"
+  }
+}
