@@ -30,10 +30,15 @@ export const appConfig: ApplicationConfig = {
         defaultOptions: {
           queries: {
             staleTime: 1000 * 30,
+            retry: (failureCount, error: unknown) => {
+              const status = (error as { status?: number })?.status;
+              if (typeof status === 'number' && status >= 400 && status < 500) return false;
+              return failureCount < 2;
+            },
           },
         },
       }),
-      withDevtools(),
+      withDevtools(() => ({ buttonPosition: 'top-right' })),
     ),
     { provide: HTTP_BASE_URL, useValue: '/api' },
     {

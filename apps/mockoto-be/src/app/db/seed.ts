@@ -1561,6 +1561,390 @@ for (const proj of DEFS) {
   }
 }
 
+// ─── Mondial 2026 projects (fixed UUIDs so demo app can hard-code them) ───────
+
+const MONDIAL_REAL_ID  = '11111111-2026-4000-8000-000000000001';
+const MONDIAL_PROXY_ID = '22222222-2026-4000-8000-000000000002';
+
+const MUNDIAL_GAMES = [
+  // ── Group A: Mexico · South Africa · South Korea · Czech Republic ──────────
+  { id:'g001', date:'2026-06-11', time:'19:00', group:'Group A', homeTeam:'Mexico',       awayTeam:'South Africa',  homeScore:2,    awayScore:0,    stadium:'Estadio Azteca',          city:'Mexico City'   },
+  { id:'g002', date:'2026-06-11', time:'22:00', group:'Group A', homeTeam:'South Korea',  awayTeam:'Czech Republic',homeScore:2,    awayScore:1,    stadium:'Estadio Akron',           city:'Guadalajara'   },
+  { id:'g003', date:'2026-06-15', time:'19:00', group:'Group A', homeTeam:'Mexico',       awayTeam:'South Korea',   homeScore:null, awayScore:null, stadium:'NRG Stadium',             city:'Houston'       },
+  { id:'g004', date:'2026-06-15', time:'22:00', group:'Group A', homeTeam:'Czech Republic',awayTeam:'South Africa', homeScore:null, awayScore:null, stadium:'Mercedes-Benz Stadium',   city:'Atlanta'       },
+  { id:'g005', date:'2026-06-21', time:'22:00', group:'Group A', homeTeam:'Mexico',       awayTeam:'Czech Republic',homeScore:null, awayScore:null, stadium:'AT&T Stadium',            city:'Dallas'        },
+  { id:'g006', date:'2026-06-21', time:'22:00', group:'Group A', homeTeam:'South Africa', awayTeam:'South Korea',   homeScore:null, awayScore:null, stadium:'Arrowhead Stadium',       city:'Kansas City'   },
+  // ── Group B: Canada · Bosnia and Herzegovina · Qatar · Switzerland ──────────
+  { id:'g007', date:'2026-06-12', time:'16:00', group:'Group B', homeTeam:'Canada',       awayTeam:'Bosnia and Herzegovina', homeScore:1, awayScore:1, stadium:'BMO Field',            city:'Toronto'       },
+  { id:'g008', date:'2026-06-12', time:'22:00', group:'Group B', homeTeam:'Qatar',        awayTeam:'Switzerland',   homeScore:null, awayScore:null, stadium:'Lumen Field',             city:'Seattle'       },
+  { id:'g009', date:'2026-06-17', time:'16:00', group:'Group B', homeTeam:'Canada',       awayTeam:'Qatar',         homeScore:null, awayScore:null, stadium:'BC Place',                city:'Vancouver'     },
+  { id:'g010', date:'2026-06-17', time:'22:00', group:'Group B', homeTeam:'Switzerland',  awayTeam:'Bosnia and Herzegovina', homeScore:null, awayScore:null, stadium:'Gillette Stadium', city:'Boston'       },
+  { id:'g011', date:'2026-06-22', time:'22:00', group:'Group B', homeTeam:'Canada',       awayTeam:'Switzerland',   homeScore:null, awayScore:null, stadium:'Lincoln Financial Field', city:'Philadelphia'  },
+  { id:'g012', date:'2026-06-22', time:'22:00', group:'Group B', homeTeam:'Bosnia and Herzegovina', awayTeam:'Qatar', homeScore:null, awayScore:null, stadium:'Hard Rock Stadium',    city:'Miami'         },
+  // ── Group C: Brazil · Morocco · Haiti · Scotland ─────────────────────────────
+  { id:'g013', date:'2026-06-13', time:'16:00', group:'Group C', homeTeam:'Brazil',       awayTeam:'Morocco',       homeScore:null, awayScore:null, stadium:'MetLife Stadium',         city:'New Jersey'    },
+  { id:'g014', date:'2026-06-13', time:'22:00', group:'Group C', homeTeam:'Haiti',        awayTeam:'Scotland',      homeScore:null, awayScore:null, stadium:'Estadio Azteca',          city:'Mexico City'   },
+  { id:'g015', date:'2026-06-18', time:'16:00', group:'Group C', homeTeam:'Brazil',       awayTeam:'Haiti',         homeScore:null, awayScore:null, stadium:'AT&T Stadium',            city:'Dallas'        },
+  { id:'g016', date:'2026-06-18', time:'22:00', group:'Group C', homeTeam:'Scotland',     awayTeam:'Morocco',       homeScore:null, awayScore:null, stadium:'NRG Stadium',             city:'Houston'       },
+  { id:'g017', date:'2026-06-23', time:'22:00', group:'Group C', homeTeam:'Brazil',       awayTeam:'Scotland',      homeScore:null, awayScore:null, stadium:"Levi's Stadium",          city:'San Francisco' },
+  { id:'g018', date:'2026-06-23', time:'22:00', group:'Group C', homeTeam:'Morocco',      awayTeam:'Haiti',         homeScore:null, awayScore:null, stadium:'BC Place',                city:'Vancouver'     },
+  // ── Group D: USA · Paraguay · Australia · Turkey ──────────────────────────────
+  { id:'g019', date:'2026-06-12', time:'19:00', group:'Group D', homeTeam:'USA',          awayTeam:'Paraguay',      homeScore:null, awayScore:null, stadium:'SoFi Stadium',            city:'Los Angeles'   },
+  { id:'g020', date:'2026-06-13', time:'19:00', group:'Group D', homeTeam:'Australia',    awayTeam:'Turkey',        homeScore:null, awayScore:null, stadium:'Arrowhead Stadium',       city:'Kansas City'   },
+  { id:'g021', date:'2026-06-17', time:'19:00', group:'Group D', homeTeam:'USA',          awayTeam:'Australia',     homeScore:null, awayScore:null, stadium:'Gillette Stadium',        city:'Boston'        },
+  { id:'g022', date:'2026-06-18', time:'19:00', group:'Group D', homeTeam:'Turkey',       awayTeam:'Paraguay',      homeScore:null, awayScore:null, stadium:'Estadio Akron',           city:'Guadalajara'   },
+  { id:'g023', date:'2026-06-22', time:'19:00', group:'Group D', homeTeam:'USA',          awayTeam:'Turkey',        homeScore:null, awayScore:null, stadium:'MetLife Stadium',         city:'New Jersey'    },
+  { id:'g024', date:'2026-06-22', time:'19:00', group:'Group D', homeTeam:'Paraguay',     awayTeam:'Australia',     homeScore:null, awayScore:null, stadium:'AT&T Stadium',            city:'Dallas'        },
+  // ── Group E: Germany · Curaçao · Côte d'Ivoire · Ecuador ─────────────────────
+  { id:'g025', date:'2026-06-14', time:'16:00', group:'Group E', homeTeam:'Germany',      awayTeam:'Curaçao',       homeScore:null, awayScore:null, stadium:'Lincoln Financial Field', city:'Philadelphia'  },
+  { id:'g026', date:'2026-06-14', time:'22:00', group:'Group E', homeTeam:"Côte d'Ivoire",awayTeam:'Ecuador',       homeScore:null, awayScore:null, stadium:'Hard Rock Stadium',       city:'Miami'         },
+  { id:'g027', date:'2026-06-19', time:'16:00', group:'Group E', homeTeam:'Germany',      awayTeam:"Côte d'Ivoire", homeScore:null, awayScore:null, stadium:'Lumen Field',             city:'Seattle'       },
+  { id:'g028', date:'2026-06-19', time:'22:00', group:'Group E', homeTeam:'Ecuador',      awayTeam:'Curaçao',       homeScore:null, awayScore:null, stadium:'Estadio Azteca',          city:'Mexico City'   },
+  { id:'g029', date:'2026-06-24', time:'19:00', group:'Group E', homeTeam:'Germany',      awayTeam:'Ecuador',       homeScore:null, awayScore:null, stadium:'BC Place',                city:'Vancouver'     },
+  { id:'g030', date:'2026-06-24', time:'19:00', group:'Group E', homeTeam:'Curaçao',      awayTeam:"Côte d'Ivoire", homeScore:null, awayScore:null, stadium:'NRG Stadium',             city:'Houston'       },
+  // ── Group F: Netherlands · Japan · Sweden · Tunisia ──────────────────────────
+  { id:'g031', date:'2026-06-14', time:'19:00', group:'Group F', homeTeam:'Netherlands',  awayTeam:'Tunisia',       homeScore:null, awayScore:null, stadium:'SoFi Stadium',            city:'Los Angeles'   },
+  { id:'g032', date:'2026-06-15', time:'16:00', group:'Group F', homeTeam:'Japan',        awayTeam:'Sweden',        homeScore:null, awayScore:null, stadium:'Mercedes-Benz Stadium',   city:'Atlanta'       },
+  { id:'g033', date:'2026-06-20', time:'16:00', group:'Group F', homeTeam:'Netherlands',  awayTeam:'Japan',         homeScore:null, awayScore:null, stadium:'Gillette Stadium',        city:'Boston'        },
+  { id:'g034', date:'2026-06-20', time:'22:00', group:'Group F', homeTeam:'Sweden',       awayTeam:'Tunisia',       homeScore:null, awayScore:null, stadium:'Estadio Akron',           city:'Guadalajara'   },
+  { id:'g035', date:'2026-06-25', time:'19:00', group:'Group F', homeTeam:'Netherlands',  awayTeam:'Sweden',        homeScore:null, awayScore:null, stadium:'AT&T Stadium',            city:'Dallas'        },
+  { id:'g036', date:'2026-06-25', time:'19:00', group:'Group F', homeTeam:'Tunisia',      awayTeam:'Japan',         homeScore:null, awayScore:null, stadium:'Hard Rock Stadium',       city:'Miami'         },
+  // ── Group G: Belgium · Egypt · Iran · New Zealand ────────────────────────────
+  { id:'g037', date:'2026-06-15', time:'19:00', group:'Group G', homeTeam:'Belgium',      awayTeam:'Egypt',         homeScore:null, awayScore:null, stadium:'MetLife Stadium',         city:'New Jersey'    },
+  { id:'g038', date:'2026-06-15', time:'22:00', group:'Group G', homeTeam:'Iran',         awayTeam:'New Zealand',   homeScore:null, awayScore:null, stadium:'Arrowhead Stadium',       city:'Kansas City'   },
+  { id:'g039', date:'2026-06-20', time:'19:00', group:'Group G', homeTeam:'Belgium',      awayTeam:'Iran',          homeScore:null, awayScore:null, stadium:'Estadio Azteca',          city:'Mexico City'   },
+  { id:'g040', date:'2026-06-20', time:'22:00', group:'Group G', homeTeam:'New Zealand',  awayTeam:'Egypt',         homeScore:null, awayScore:null, stadium:'Lumen Field',             city:'Seattle'       },
+  { id:'g041', date:'2026-06-25', time:'22:00', group:'Group G', homeTeam:'Belgium',      awayTeam:'New Zealand',   homeScore:null, awayScore:null, stadium:'Lincoln Financial Field', city:'Philadelphia'  },
+  { id:'g042', date:'2026-06-25', time:'22:00', group:'Group G', homeTeam:'Egypt',        awayTeam:'Iran',          homeScore:null, awayScore:null, stadium:"Levi's Stadium",          city:'San Francisco' },
+  // ── Group H: Spain · Cabo Verde · Saudi Arabia · Uruguay ─────────────────────
+  { id:'g043', date:'2026-06-16', time:'16:00', group:'Group H', homeTeam:'Spain',        awayTeam:'Cabo Verde',    homeScore:null, awayScore:null, stadium:'BC Place',                city:'Vancouver'     },
+  { id:'g044', date:'2026-06-16', time:'22:00', group:'Group H', homeTeam:'Saudi Arabia', awayTeam:'Uruguay',       homeScore:null, awayScore:null, stadium:'NRG Stadium',             city:'Houston'       },
+  { id:'g045', date:'2026-06-21', time:'16:00', group:'Group H', homeTeam:'Spain',        awayTeam:'Saudi Arabia',  homeScore:null, awayScore:null, stadium:'SoFi Stadium',            city:'Los Angeles'   },
+  { id:'g046', date:'2026-06-21', time:'22:00', group:'Group H', homeTeam:'Uruguay',      awayTeam:'Cabo Verde',    homeScore:null, awayScore:null, stadium:'Mercedes-Benz Stadium',   city:'Atlanta'       },
+  { id:'g047', date:'2026-06-26', time:'19:00', group:'Group H', homeTeam:'Spain',        awayTeam:'Uruguay',       homeScore:null, awayScore:null, stadium:'Gillette Stadium',        city:'Boston'        },
+  { id:'g048', date:'2026-06-26', time:'19:00', group:'Group H', homeTeam:'Cabo Verde',   awayTeam:'Saudi Arabia',  homeScore:null, awayScore:null, stadium:'Estadio Akron',           city:'Guadalajara'   },
+  // ── Group I: France · Senegal · Iraq · Norway ────────────────────────────────
+  { id:'g049', date:'2026-06-16', time:'19:00', group:'Group I', homeTeam:'France',       awayTeam:'Iraq',          homeScore:null, awayScore:null, stadium:'AT&T Stadium',            city:'Dallas'        },
+  { id:'g050', date:'2026-06-17', time:'16:00', group:'Group I', homeTeam:'Senegal',      awayTeam:'Norway',        homeScore:null, awayScore:null, stadium:'MetLife Stadium',         city:'New Jersey'    },
+  { id:'g051', date:'2026-06-21', time:'19:00', group:'Group I', homeTeam:'France',       awayTeam:'Senegal',       homeScore:null, awayScore:null, stadium:'Lumen Field',             city:'Seattle'       },
+  { id:'g052', date:'2026-06-22', time:'16:00', group:'Group I', homeTeam:'Norway',       awayTeam:'Iraq',          homeScore:null, awayScore:null, stadium:'Hard Rock Stadium',       city:'Miami'         },
+  { id:'g053', date:'2026-06-26', time:'22:00', group:'Group I', homeTeam:'France',       awayTeam:'Norway',        homeScore:null, awayScore:null, stadium:'Arrowhead Stadium',       city:'Kansas City'   },
+  { id:'g054', date:'2026-06-26', time:'22:00', group:'Group I', homeTeam:'Iraq',         awayTeam:'Senegal',       homeScore:null, awayScore:null, stadium:"Levi's Stadium",          city:'San Francisco' },
+  // ── Group J: Argentina · Algeria · Austria · Jordan ──────────────────────────
+  { id:'g055', date:'2026-06-17', time:'22:00', group:'Group J', homeTeam:'Argentina',    awayTeam:'Algeria',       homeScore:null, awayScore:null, stadium:'MetLife Stadium',         city:'New Jersey'    },
+  { id:'g056', date:'2026-06-18', time:'16:00', group:'Group J', homeTeam:'Austria',      awayTeam:'Jordan',        homeScore:null, awayScore:null, stadium:'SoFi Stadium',            city:'Los Angeles'   },
+  { id:'g057', date:'2026-06-22', time:'22:00', group:'Group J', homeTeam:'Argentina',    awayTeam:'Austria',       homeScore:null, awayScore:null, stadium:'AT&T Stadium',            city:'Dallas'        },
+  { id:'g058', date:'2026-06-23', time:'16:00', group:'Group J', homeTeam:'Jordan',       awayTeam:'Algeria',       homeScore:null, awayScore:null, stadium:'NRG Stadium',             city:'Houston'       },
+  { id:'g059', date:'2026-06-26', time:'19:00', group:'Group J', homeTeam:'Argentina',    awayTeam:'Jordan',        homeScore:null, awayScore:null, stadium:'Lincoln Financial Field', city:'Philadelphia'  },
+  { id:'g060', date:'2026-06-26', time:'19:00', group:'Group J', homeTeam:'Algeria',      awayTeam:'Austria',       homeScore:null, awayScore:null, stadium:'BC Place',                city:'Vancouver'     },
+  // ── Group K: Portugal · DR Congo · Uzbekistan · Colombia ─────────────────────
+  { id:'g061', date:'2026-06-17', time:'19:00', group:'Group K', homeTeam:'Portugal',     awayTeam:'DR Congo',      homeScore:null, awayScore:null, stadium:'Estadio Azteca',          city:'Mexico City'   },
+  { id:'g062', date:'2026-06-18', time:'22:00', group:'Group K', homeTeam:'Uzbekistan',   awayTeam:'Colombia',      homeScore:null, awayScore:null, stadium:'Estadio Akron',           city:'Guadalajara'   },
+  { id:'g063', date:'2026-06-22', time:'16:00', group:'Group K', homeTeam:'Portugal',     awayTeam:'Uzbekistan',    homeScore:null, awayScore:null, stadium:'Hard Rock Stadium',       city:'Miami'         },
+  { id:'g064', date:'2026-06-23', time:'22:00', group:'Group K', homeTeam:'Colombia',     awayTeam:'DR Congo',      homeScore:null, awayScore:null, stadium:'Mercedes-Benz Stadium',   city:'Atlanta'       },
+  { id:'g065', date:'2026-06-27', time:'19:00', group:'Group K', homeTeam:'Portugal',     awayTeam:'Colombia',      homeScore:null, awayScore:null, stadium:'SoFi Stadium',            city:'Los Angeles'   },
+  { id:'g066', date:'2026-06-27', time:'19:00', group:'Group K', homeTeam:'DR Congo',     awayTeam:'Uzbekistan',    homeScore:null, awayScore:null, stadium:'Lumen Field',             city:'Seattle'       },
+  // ── Group L: England · Croatia · Ghana · Panama ───────────────────────────────
+  { id:'g067', date:'2026-06-18', time:'19:00', group:'Group L', homeTeam:'England',      awayTeam:'Croatia',       homeScore:null, awayScore:null, stadium:'Gillette Stadium',        city:'Boston'        },
+  { id:'g068', date:'2026-06-19', time:'16:00', group:'Group L', homeTeam:'Ghana',        awayTeam:'Panama',        homeScore:null, awayScore:null, stadium:'Arrowhead Stadium',       city:'Kansas City'   },
+  { id:'g069', date:'2026-06-23', time:'19:00', group:'Group L', homeTeam:'England',      awayTeam:'Ghana',         homeScore:null, awayScore:null, stadium:'BC Place',                city:'Vancouver'     },
+  { id:'g070', date:'2026-06-24', time:'22:00', group:'Group L', homeTeam:'Panama',       awayTeam:'Croatia',       homeScore:null, awayScore:null, stadium:'NRG Stadium',             city:'Houston'       },
+  { id:'g071', date:'2026-06-27', time:'22:00', group:'Group L', homeTeam:'England',      awayTeam:'Panama',        homeScore:null, awayScore:null, stadium:'MetLife Stadium',         city:'New Jersey'    },
+  { id:'g072', date:'2026-06-27', time:'22:00', group:'Group L', homeTeam:'Croatia',      awayTeam:'Ghana',         homeScore:null, awayScore:null, stadium:'AT&T Stadium',            city:'Dallas'        },
+  // ── Round of 32 (placeholders) ───────────────────────────────────────────────
+  { id:'g073', date:'2026-06-29', time:'15:00', group:'Round of 32', homeTeam:'1A', awayTeam:'3E/F/G', homeScore:null, awayScore:null, stadium:'MetLife Stadium',  city:'New Jersey'    },
+  { id:'g074', date:'2026-06-29', time:'19:00', group:'Round of 32', homeTeam:'1C', awayTeam:'3A/B/D', homeScore:null, awayScore:null, stadium:'AT&T Stadium',     city:'Dallas'        },
+  { id:'g075', date:'2026-06-29', time:'23:00', group:'Round of 32', homeTeam:'1B', awayTeam:'3G/H/I', homeScore:null, awayScore:null, stadium:'SoFi Stadium',     city:'Los Angeles'   },
+  { id:'g076', date:'2026-06-30', time:'15:00', group:'Round of 32', homeTeam:'1D', awayTeam:'2D',     homeScore:null, awayScore:null, stadium:'Estadio Azteca',   city:'Mexico City'   },
+];
+
+const MUNDIAL_GROUPS = [
+  { name:'Group A', teams:[
+    { name:'South Korea',    played:1, won:1, drawn:0, lost:0, goalsFor:2, goalsAgainst:1, points:3 },
+    { name:'Mexico',         played:1, won:1, drawn:0, lost:0, goalsFor:2, goalsAgainst:0, points:3 },
+    { name:'Czech Republic', played:1, won:0, drawn:0, lost:1, goalsFor:1, goalsAgainst:2, points:0 },
+    { name:'South Africa',   played:1, won:0, drawn:0, lost:1, goalsFor:0, goalsAgainst:2, points:0 },
+  ]},
+  { name:'Group B', teams:[
+    { name:'Canada',                  played:1, won:0, drawn:1, lost:0, goalsFor:1, goalsAgainst:1, points:1 },
+    { name:'Bosnia and Herzegovina',  played:1, won:0, drawn:1, lost:0, goalsFor:1, goalsAgainst:1, points:1 },
+    { name:'Qatar',                   played:0, won:0, drawn:0, lost:0, goalsFor:0, goalsAgainst:0, points:0 },
+    { name:'Switzerland',             played:0, won:0, drawn:0, lost:0, goalsFor:0, goalsAgainst:0, points:0 },
+  ]},
+  { name:'Group C', teams:[
+    { name:'Brazil',    played:0, won:0, drawn:0, lost:0, goalsFor:0, goalsAgainst:0, points:0 },
+    { name:'Morocco',   played:0, won:0, drawn:0, lost:0, goalsFor:0, goalsAgainst:0, points:0 },
+    { name:'Haiti',     played:0, won:0, drawn:0, lost:0, goalsFor:0, goalsAgainst:0, points:0 },
+    { name:'Scotland',  played:0, won:0, drawn:0, lost:0, goalsFor:0, goalsAgainst:0, points:0 },
+  ]},
+  { name:'Group D', teams:[
+    { name:'USA',       played:0, won:0, drawn:0, lost:0, goalsFor:0, goalsAgainst:0, points:0 },
+    { name:'Paraguay',  played:0, won:0, drawn:0, lost:0, goalsFor:0, goalsAgainst:0, points:0 },
+    { name:'Australia', played:0, won:0, drawn:0, lost:0, goalsFor:0, goalsAgainst:0, points:0 },
+    { name:'Turkey',    played:0, won:0, drawn:0, lost:0, goalsFor:0, goalsAgainst:0, points:0 },
+  ]},
+  { name:'Group E', teams:[
+    { name:'Germany',       played:0, won:0, drawn:0, lost:0, goalsFor:0, goalsAgainst:0, points:0 },
+    { name:"Côte d'Ivoire", played:0, won:0, drawn:0, lost:0, goalsFor:0, goalsAgainst:0, points:0 },
+    { name:'Ecuador',       played:0, won:0, drawn:0, lost:0, goalsFor:0, goalsAgainst:0, points:0 },
+    { name:'Curaçao',       played:0, won:0, drawn:0, lost:0, goalsFor:0, goalsAgainst:0, points:0 },
+  ]},
+  { name:'Group F', teams:[
+    { name:'Netherlands', played:0, won:0, drawn:0, lost:0, goalsFor:0, goalsAgainst:0, points:0 },
+    { name:'Japan',       played:0, won:0, drawn:0, lost:0, goalsFor:0, goalsAgainst:0, points:0 },
+    { name:'Sweden',      played:0, won:0, drawn:0, lost:0, goalsFor:0, goalsAgainst:0, points:0 },
+    { name:'Tunisia',     played:0, won:0, drawn:0, lost:0, goalsFor:0, goalsAgainst:0, points:0 },
+  ]},
+  { name:'Group G', teams:[
+    { name:'Belgium',     played:0, won:0, drawn:0, lost:0, goalsFor:0, goalsAgainst:0, points:0 },
+    { name:'Egypt',       played:0, won:0, drawn:0, lost:0, goalsFor:0, goalsAgainst:0, points:0 },
+    { name:'Iran',        played:0, won:0, drawn:0, lost:0, goalsFor:0, goalsAgainst:0, points:0 },
+    { name:'New Zealand', played:0, won:0, drawn:0, lost:0, goalsFor:0, goalsAgainst:0, points:0 },
+  ]},
+  { name:'Group H', teams:[
+    { name:'Spain',        played:0, won:0, drawn:0, lost:0, goalsFor:0, goalsAgainst:0, points:0 },
+    { name:'Uruguay',      played:0, won:0, drawn:0, lost:0, goalsFor:0, goalsAgainst:0, points:0 },
+    { name:'Saudi Arabia', played:0, won:0, drawn:0, lost:0, goalsFor:0, goalsAgainst:0, points:0 },
+    { name:'Cabo Verde',   played:0, won:0, drawn:0, lost:0, goalsFor:0, goalsAgainst:0, points:0 },
+  ]},
+  { name:'Group I', teams:[
+    { name:'France',  played:0, won:0, drawn:0, lost:0, goalsFor:0, goalsAgainst:0, points:0 },
+    { name:'Senegal', played:0, won:0, drawn:0, lost:0, goalsFor:0, goalsAgainst:0, points:0 },
+    { name:'Norway',  played:0, won:0, drawn:0, lost:0, goalsFor:0, goalsAgainst:0, points:0 },
+    { name:'Iraq',    played:0, won:0, drawn:0, lost:0, goalsFor:0, goalsAgainst:0, points:0 },
+  ]},
+  { name:'Group J', teams:[
+    { name:'Argentina', played:0, won:0, drawn:0, lost:0, goalsFor:0, goalsAgainst:0, points:0 },
+    { name:'Algeria',   played:0, won:0, drawn:0, lost:0, goalsFor:0, goalsAgainst:0, points:0 },
+    { name:'Austria',   played:0, won:0, drawn:0, lost:0, goalsFor:0, goalsAgainst:0, points:0 },
+    { name:'Jordan',    played:0, won:0, drawn:0, lost:0, goalsFor:0, goalsAgainst:0, points:0 },
+  ]},
+  { name:'Group K', teams:[
+    { name:'Portugal',   played:0, won:0, drawn:0, lost:0, goalsFor:0, goalsAgainst:0, points:0 },
+    { name:'Colombia',   played:0, won:0, drawn:0, lost:0, goalsFor:0, goalsAgainst:0, points:0 },
+    { name:'DR Congo',   played:0, won:0, drawn:0, lost:0, goalsFor:0, goalsAgainst:0, points:0 },
+    { name:'Uzbekistan', played:0, won:0, drawn:0, lost:0, goalsFor:0, goalsAgainst:0, points:0 },
+  ]},
+  { name:'Group L', teams:[
+    { name:'England',  played:0, won:0, drawn:0, lost:0, goalsFor:0, goalsAgainst:0, points:0 },
+    { name:'Croatia',  played:0, won:0, drawn:0, lost:0, goalsFor:0, goalsAgainst:0, points:0 },
+    { name:'Ghana',    played:0, won:0, drawn:0, lost:0, goalsFor:0, goalsAgainst:0, points:0 },
+    { name:'Panama',   played:0, won:0, drawn:0, lost:0, goalsFor:0, goalsAgainst:0, points:0 },
+  ]},
+];
+
+const MUNDIAL_TEAMS = [
+  // Group A
+  { id:'t001', name:'Mexico',                  code:'MEX', group:'Group A', confederation:'CONCACAF', rank:15 },
+  { id:'t002', name:'South Africa',            code:'RSA', group:'Group A', confederation:'CAF',      rank:67 },
+  { id:'t003', name:'South Korea',             code:'KOR', group:'Group A', confederation:'AFC',      rank:22 },
+  { id:'t004', name:'Czech Republic',          code:'CZE', group:'Group A', confederation:'UEFA',     rank:40 },
+  // Group B
+  { id:'t005', name:'Canada',                  code:'CAN', group:'Group B', confederation:'CONCACAF', rank:47 },
+  { id:'t006', name:'Bosnia and Herzegovina',  code:'BIH', group:'Group B', confederation:'UEFA',     rank:65 },
+  { id:'t007', name:'Qatar',                   code:'QAT', group:'Group B', confederation:'AFC',      rank:37 },
+  { id:'t008', name:'Switzerland',             code:'SUI', group:'Group B', confederation:'UEFA',     rank:19 },
+  // Group C
+  { id:'t009', name:'Brazil',                  code:'BRA', group:'Group C', confederation:'CONMEBOL', rank:5  },
+  { id:'t010', name:'Morocco',                 code:'MAR', group:'Group C', confederation:'CAF',      rank:14 },
+  { id:'t011', name:'Haiti',                   code:'HAI', group:'Group C', confederation:'CONCACAF', rank:83 },
+  { id:'t012', name:'Scotland',                code:'SCO', group:'Group C', confederation:'UEFA',     rank:29 },
+  // Group D
+  { id:'t013', name:'USA',                     code:'USA', group:'Group D', confederation:'CONCACAF', rank:16 },
+  { id:'t014', name:'Paraguay',                code:'PAR', group:'Group D', confederation:'CONMEBOL', rank:62 },
+  { id:'t015', name:'Australia',               code:'AUS', group:'Group D', confederation:'AFC',      rank:24 },
+  { id:'t016', name:'Turkey',                  code:'TUR', group:'Group D', confederation:'UEFA',     rank:26 },
+  // Group E
+  { id:'t017', name:'Germany',                 code:'GER', group:'Group E', confederation:'UEFA',     rank:12 },
+  { id:'t018', name:'Curaçao',                 code:'CUW', group:'Group E', confederation:'CONCACAF', rank:93 },
+  { id:'t019', name:"Côte d'Ivoire",           code:'CIV', group:'Group E', confederation:'CAF',      rank:44 },
+  { id:'t020', name:'Ecuador',                 code:'ECU', group:'Group E', confederation:'CONMEBOL', rank:35 },
+  // Group F
+  { id:'t021', name:'Netherlands',             code:'NED', group:'Group F', confederation:'UEFA',     rank:8  },
+  { id:'t022', name:'Japan',                   code:'JPN', group:'Group F', confederation:'AFC',      rank:18 },
+  { id:'t023', name:'Sweden',                  code:'SWE', group:'Group F', confederation:'UEFA',     rank:27 },
+  { id:'t024', name:'Tunisia',                 code:'TUN', group:'Group F', confederation:'CAF',      rank:55 },
+  // Group G
+  { id:'t025', name:'Belgium',                 code:'BEL', group:'Group G', confederation:'UEFA',     rank:3  },
+  { id:'t026', name:'Egypt',                   code:'EGY', group:'Group G', confederation:'CAF',      rank:45 },
+  { id:'t027', name:'Iran',                    code:'IRN', group:'Group G', confederation:'AFC',      rank:21 },
+  { id:'t028', name:'New Zealand',             code:'NZL', group:'Group G', confederation:'OFC',      rank:98 },
+  // Group H
+  { id:'t029', name:'Spain',                   code:'ESP', group:'Group H', confederation:'UEFA',     rank:1  },
+  { id:'t030', name:'Cabo Verde',              code:'CPV', group:'Group H', confederation:'CAF',      rank:89 },
+  { id:'t031', name:'Saudi Arabia',            code:'KSA', group:'Group H', confederation:'AFC',      rank:56 },
+  { id:'t032', name:'Uruguay',                 code:'URU', group:'Group H', confederation:'CONMEBOL', rank:17 },
+  // Group I
+  { id:'t033', name:'France',                  code:'FRA', group:'Group I', confederation:'UEFA',     rank:2  },
+  { id:'t034', name:'Senegal',                 code:'SEN', group:'Group I', confederation:'CAF',      rank:20 },
+  { id:'t035', name:'Iraq',                    code:'IRQ', group:'Group I', confederation:'AFC',      rank:58 },
+  { id:'t036', name:'Norway',                  code:'NOR', group:'Group I', confederation:'UEFA',     rank:30 },
+  // Group J
+  { id:'t037', name:'Argentina',               code:'ARG', group:'Group J', confederation:'CONMEBOL', rank:1  },
+  { id:'t038', name:'Algeria',                 code:'ALG', group:'Group J', confederation:'CAF',      rank:49 },
+  { id:'t039', name:'Austria',                 code:'AUT', group:'Group J', confederation:'UEFA',     rank:25 },
+  { id:'t040', name:'Jordan',                  code:'JOR', group:'Group J', confederation:'AFC',      rank:87 },
+  // Group K
+  { id:'t041', name:'Portugal',                code:'POR', group:'Group K', confederation:'UEFA',     rank:6  },
+  { id:'t042', name:'DR Congo',                code:'COD', group:'Group K', confederation:'CAF',      rank:60 },
+  { id:'t043', name:'Uzbekistan',              code:'UZB', group:'Group K', confederation:'AFC',      rank:77 },
+  { id:'t044', name:'Colombia',                code:'COL', group:'Group K', confederation:'CONMEBOL', rank:30 },
+  // Group L
+  { id:'t045', name:'England',                 code:'ENG', group:'Group L', confederation:'UEFA',     rank:4  },
+  { id:'t046', name:'Croatia',                 code:'CRO', group:'Group L', confederation:'UEFA',     rank:14 },
+  { id:'t047', name:'Ghana',                   code:'GHA', group:'Group L', confederation:'CAF',      rank:66 },
+  { id:'t048', name:'Panama',                  code:'PAN', group:'Group L', confederation:'CONCACAF', rank:59 },
+];
+
+// ── Project 1: Real Data (local mocks — actual game data) ─────────────────────
+projectRows.push({
+  id: MONDIAL_REAL_ID,
+  name: 'Mondial 2026 – Real Data',
+  description: 'Live World Cup 2026 data — acts as the upstream real server',
+  baseUrl: 'https://api.fifa.int',
+  ownerName: 'demo',
+  isFavorite: true,
+  createdAt: ts(),
+  updatedAt: ts(),
+});
+
+const realCollId = randomUUID();
+collectionRows.push({
+  id: realCollId,
+  projectId: MONDIAL_REAL_ID,
+  name: 'Live Data',
+  description: 'Full game schedule, group standings and team roster',
+  mode: 'local' as const,
+  recordingStrategy: 'none' as const,
+  source: 'manual' as const,
+  isActive: true,
+  isFavorite: true,
+  ownerName: 'demo',
+  createdAt: ts(),
+  updatedAt: ts(),
+});
+
+const gamesRuleId = randomUUID();
+ruleRows.push({
+  id: gamesRuleId,
+  projectId: MONDIAL_REAL_ID,
+  collectionId: realCollId,
+  url: '/mundial/games',
+  requestMethod: 'GET' as const,
+  description: 'Full match schedule',
+  lookupHash: ruleLookupHash('/mundial/games', 'GET', undefined),
+  passthrough: false,
+  type: 'manual' as const,
+  isFavorite: true,
+  isEnabled: true,
+  createdAt: ts(),
+  updatedAt: ts(),
+});
+responseRows.push({
+  id: randomUUID(),
+  ruleId: gamesRuleId,
+  name: 'All Games',
+  statusCode: 200,
+  isActive: true,
+  isError: false,
+  isFavorite: false,
+  latency: 60,
+  body: JSON.stringify(MUNDIAL_GAMES),
+  createdAt: ts(),
+  updatedAt: ts(),
+});
+
+const groupsRuleId = randomUUID();
+ruleRows.push({
+  id: groupsRuleId,
+  projectId: MONDIAL_REAL_ID,
+  collectionId: realCollId,
+  url: '/mundial/groups',
+  requestMethod: 'GET' as const,
+  description: 'Group standings',
+  lookupHash: ruleLookupHash('/mundial/groups', 'GET', undefined),
+  passthrough: false,
+  type: 'manual' as const,
+  isFavorite: false,
+  isEnabled: true,
+  createdAt: ts(),
+  updatedAt: ts(),
+});
+responseRows.push({
+  id: randomUUID(),
+  ruleId: groupsRuleId,
+  name: 'Groups & Standings',
+  statusCode: 200,
+  isActive: true,
+  isError: false,
+  isFavorite: false,
+  latency: 40,
+  body: JSON.stringify(MUNDIAL_GROUPS),
+  createdAt: ts(),
+  updatedAt: ts(),
+});
+
+const teamsRuleId = randomUUID();
+ruleRows.push({
+  id: teamsRuleId,
+  projectId: MONDIAL_REAL_ID,
+  collectionId: realCollId,
+  url: '/mundial/teams',
+  requestMethod: 'GET' as const,
+  description: 'All participating teams',
+  lookupHash: ruleLookupHash('/mundial/teams', 'GET', undefined),
+  passthrough: false,
+  type: 'manual' as const,
+  isFavorite: false,
+  isEnabled: true,
+  createdAt: ts(),
+  updatedAt: ts(),
+});
+responseRows.push({
+  id: randomUUID(),
+  ruleId: teamsRuleId,
+  name: 'All Teams',
+  statusCode: 200,
+  isActive: true,
+  isError: false,
+  isFavorite: false,
+  latency: 30,
+  body: JSON.stringify(MUNDIAL_TEAMS),
+  createdAt: ts(),
+  updatedAt: ts(),
+});
+
+// ── Project 2: Proxy (captures responses from Project 1 at runtime) ───────────
+projectRows.push({
+  id: MONDIAL_PROXY_ID,
+  name: 'Mondial 2026 – Proxy',
+  description: 'Proxy project — forwards unknown requests to the Real Data project and records them as new rules',
+  baseUrl: `http://localhost:3001/${MONDIAL_REAL_ID}`,
+  ownerName: 'demo',
+  isFavorite: true,
+  createdAt: ts(),
+  updatedAt: ts(),
+});
+
+const proxyCollId = randomUUID();
+collectionRows.push({
+  id: proxyCollId,
+  projectId: MONDIAL_PROXY_ID,
+  name: 'Proxy Recording',
+  description: 'proxy mode with full recording — captured rules accumulate here over time',
+  mode: 'proxy' as const,
+  recordingStrategy: 'all' as const,
+  source: 'recording' as const,
+  isActive: true,
+  isFavorite: false,
+  ownerName: 'demo',
+  createdAt: ts(),
+  updatedAt: ts(),
+});
+// No initial rules — they will be created automatically when the demo app calls
+// http://localhost:3001/22222222-2026-4000-8000-000000000002/mundial/games
+// and the proxy forwards to the Real Data project and records the response.
+
 // ─── Insert ───────────────────────────────────────────────────────────────────
 
 async function seed() {

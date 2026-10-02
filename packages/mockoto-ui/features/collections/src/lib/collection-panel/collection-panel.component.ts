@@ -1,21 +1,14 @@
-import { Component, computed, effect, inject, signal } from '@angular/core';
+import { Component, computed, effect, inject, signal, untracked } from '@angular/core';
 import { BasePanelComponent, panelEntityStatus } from '@mockoto-ui/core';
 import { FormsModule } from '@angular/forms';
-import { ButtonComponent, InputComponent, PanelQueryGateComponent, SidePanelComponent, ToggleComponent } from '@mockoto-ui/design-system';
-import type { CollectionMode } from '@mockoto/shared';
+import { ButtonComponent, InputComponent, PanelQueryGateComponent, SidePanelComponent } from '@mockoto-ui/design-system';
+import type { CollectionMode, RecordingStrategy, UpdateCollectionDto } from '@mockoto/shared';
 import { CollectionsService } from '../collections.service';
-
-const SELECT_CLASS = [
-  'h-8 w-full rounded-lg border border-gray-200 bg-white px-3',
-  'font-sans text-xs text-gray-900',
-  'transition-colors focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/15',
-  'dark:border-border dark:bg-bg dark:text-zinc-100 dark:focus:border-accent dark:focus:ring-accent/15',
-].join(' ');
 
 @Component({
   selector: 'mk-collection-panel',
   standalone: true,
-  imports: [FormsModule, SidePanelComponent, InputComponent, ButtonComponent, ToggleComponent, PanelQueryGateComponent],
+  imports: [FormsModule, SidePanelComponent, InputComponent, ButtonComponent, PanelQueryGateComponent],
   template: `
     <mk-side-panel [title]="mode === 'create' ? 'New Collection' : 'Edit Collection'" (closed)="close()">
       <mk-panel-query-gate
@@ -31,6 +24,29 @@ const SELECT_CLASS = [
         <!-- ── Scrollable fields ─────────────────────────────── -->
         <div class="flex flex-1 flex-col gap-5">
 
+          <!-- Active indicator (top) -->
+          <div class="flex items-center justify-between rounded-lg border border-gray-100 px-3 py-2 dark:border-border">
+            <button type="button" (click)="onActiveToggle()" class="text-xs font-medium text-gray-700 dark:text-zinc-300 cursor-pointer">Active collection</button>
+            <button
+              type="button"
+              (click)="onActiveToggle()"
+              [title]="isActive() ? 'Active — click to deactivate' : 'Inactive — click to activate'"
+              [attr.aria-label]="isActive() ? 'Active — click to deactivate' : 'Inactive — click to activate'"
+              [attr.aria-pressed]="isActive()"
+              class="flex h-7 w-7 items-center justify-center rounded transition-colors"
+              [class]="isActive()
+                ? 'text-emerald-500'
+                : 'text-gray-300 hover:text-emerald-400 dark:text-zinc-600 dark:hover:text-emerald-500'"
+            >
+              <span
+                class="h-3 w-3 rounded-full transition-colors"
+                [class]="isActive()
+                  ? 'bg-emerald-500 shadow-[0_0_6px_1px] shadow-emerald-400/60'
+                  : 'border-2 border-current'"
+              ></span>
+            </button>
+          </div>
+
           <!-- Info section -->
           <div class="flex flex-col gap-3">
             <div class="flex items-center gap-2">
@@ -38,20 +54,24 @@ const SELECT_CLASS = [
               <div class="h-px flex-1 bg-gray-100 dark:bg-border"></div>
             </div>
 
-            <mk-input
-              label="Name"
-              [value]="name()"
-              (valueChange)="name.set($any($event))"
-              [error]="nameError()"
-              placeholder="Auth flows"
-            />
+            <div (focusout)="onNameBlur()">
+              <mk-input
+                label="Name"
+                [value]="name()"
+                (valueChange)="name.set($event)"
+                [error]="nameError()"
+                placeholder="Auth flows"
+              />
+            </div>
 
-            <mk-input
-              label="Description"
-              [value]="description()"
-              (valueChange)="description.set($any($event))"
-              placeholder="Optional description"
-            />
+            <div (focusout)="onDescriptionBlur()">
+              <mk-input
+                label="Description"
+                [value]="description()"
+                (valueChange)="description.set($event)"
+                placeholder="Optional description"
+              />
+            </div>
           </div>
 
           <!-- Behavior section -->
@@ -61,27 +81,44 @@ const SELECT_CLASS = [
               <div class="h-px flex-1 bg-gray-100 dark:bg-border"></div>
             </div>
 
+            <!-- Mode button group -->
             <div class="flex flex-col gap-1.5">
               <label class="text-xs font-medium text-gray-600 dark:text-zinc-400">Mode</label>
-              <select
-                [ngModel]="collectionMode()"
-                (ngModelChange)="collectionMode.set($event)"
-                name="collectionMode"
-                [class]="SELECT_CLASS"
-              >
-                @for (opt of modeOptions; track opt.value) {
-                  <option [value]="opt.value">{{ opt.label }}</option>
-                }
-              </select>
+              <div class="flex overflow-hidden rounded-lg border border-gray-200 dark:border-border">
+                <button type="button" (click)="onModeChange('local')"
+                  class="flex-1 px-3 py-1.5 text-xs font-medium transition-colors border-r border-gray-200 dark:border-border"
+                  [class]="collectionMode() === 'local'
+                    ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-500/15 dark:text-emerald-300'
+                    : 'bg-transparent text-gray-500 hover:bg-gray-50 hover:text-gray-800 dark:text-zinc-400 dark:hover:bg-white/5 dark:hover:text-zinc-200'"
+                >Local</button>
+                <button type="button" (click)="onModeChange('proxy')"
+                  class="flex-1 px-3 py-1.5 text-xs font-medium transition-colors"
+                  [class]="collectionMode() === 'proxy'
+                    ? 'bg-violet-100 text-violet-700 dark:bg-violet-500/15 dark:text-violet-300'
+                    : 'bg-transparent text-gray-500 hover:bg-gray-50 hover:text-gray-800 dark:text-zinc-400 dark:hover:bg-white/5 dark:hover:text-zinc-200'"
+                >Proxy</button>
+              </div>
             </div>
 
-            <div class="flex items-center justify-between rounded-lg border border-gray-100 px-3 py-2 dark:border-border">
-              <div>
-                <p class="text-xs font-medium text-gray-700 dark:text-zinc-300">Active</p>
-                <p class="mt-0.5 text-xs text-gray-400 dark:text-zinc-600">Collection responds to matching requests</p>
+            <!-- Recording strategy button grid (proxy only) -->
+            @if (collectionMode() === 'proxy') {
+              <div class="flex flex-col gap-1.5">
+                <label class="text-xs font-medium text-gray-600 dark:text-zinc-400">Recording</label>
+                <div class="grid grid-cols-2 gap-1.5">
+                  @for (opt of recordingOptions; track opt.value) {
+                    <button
+                      type="button"
+                      (click)="onStrategyChange(opt.value)"
+                      class="rounded-lg border px-3 py-2 text-left text-xs font-medium transition-colors"
+                      [class]="recordingStrategy() === opt.value
+                        ? opt.activeClass
+                        : 'border-gray-200 bg-white text-gray-500 hover:border-gray-300 hover:text-gray-800 dark:border-border dark:bg-transparent dark:text-zinc-400 dark:hover:border-zinc-600 dark:hover:text-zinc-200'"
+                    >{{ opt.label }}</button>
+                  }
+                </div>
+                <p class="text-[11px] text-gray-400 dark:text-zinc-600">{{ recordingHint() }}</p>
               </div>
-              <mk-toggle [checked]="isActive()" (checkedChange)="isActive.set($any($event))" />
-            </div>
+            }
           </div>
 
         </div>
@@ -113,11 +150,12 @@ export class CollectionPanelComponent extends BasePanelComponent {
     .map(s => s.paramMap.get('projectId'))
     .find(id => id != null) ?? '');
 
-  protected readonly modeOptions: { value: CollectionMode; label: string }[] = [
-    { value: 'local', label: 'Local' },
-    { value: 'proxy', label: 'Proxy' },
+  protected readonly recordingOptions: { value: RecordingStrategy; label: string; activeClass: string }[] = [
+    { value: 'all',     label: 'All requests',  activeClass: 'border-indigo-400 bg-indigo-100 text-indigo-700 dark:border-indigo-500 dark:bg-indigo-500/15 dark:text-indigo-300' },
+    { value: 'success', label: 'Success (2xx)', activeClass: 'border-emerald-400 bg-emerald-100 text-emerald-700 dark:border-emerald-500 dark:bg-emerald-500/15 dark:text-emerald-300' },
+    { value: 'error',   label: 'Errors (4xx+)', activeClass: 'border-rose-400 bg-rose-100 text-rose-700 dark:border-rose-500 dark:bg-rose-500/15 dark:text-rose-300' },
+    { value: 'none',    label: 'Passthrough',   activeClass: 'border-gray-300 bg-gray-100 text-gray-600 dark:border-zinc-600 dark:bg-white/5 dark:text-zinc-300' },
   ];
-  protected readonly SELECT_CLASS = SELECT_CLASS;
 
   protected readonly dataQuery = this.svc.collectionQuery(() => this.entityId);
   private readonly createMut = this.svc.createMutation();
@@ -126,11 +164,21 @@ export class CollectionPanelComponent extends BasePanelComponent {
 
   private createdId: string | null = null;
 
-  protected readonly name           = signal('');
-  protected readonly description    = signal('');
-  protected readonly collectionMode = signal<CollectionMode>('local');
-  protected readonly isActive       = signal(false);
-  protected readonly nameError      = signal('');
+  protected readonly name               = signal('');
+  protected readonly description        = signal('');
+  protected readonly collectionMode     = signal<CollectionMode>('local');
+  protected readonly recordingStrategy  = signal<RecordingStrategy>('none');
+  protected readonly isActive           = signal(false);
+  protected readonly nameError          = signal('');
+
+  protected readonly recordingHint = computed(() => {
+    switch (this.recordingStrategy()) {
+      case 'all':     return 'Every proxied request is saved as a rule.';
+      case 'success': return 'Only 2xx responses are saved as rules.';
+      case 'error':   return 'Only 4xx/5xx responses are saved as rules.';
+      case 'none':    return 'Requests are forwarded as-is — nothing is recorded.';
+    }
+  });
 
   protected readonly entityStatus = computed(() =>
     this.mode === 'create' ? 'ready' as const : panelEntityStatus(this.dataQuery),
@@ -142,11 +190,14 @@ export class CollectionPanelComponent extends BasePanelComponent {
     effect(() => {
       const data = this.dataQuery.data();
       if (data && !this.populated) {
-        this.name.set(data.name);
-        this.description.set(data.description ?? '');
-        this.collectionMode.set(data.mode);
-        this.isActive.set(data.isActive);
-        this.populated = true;
+        untracked(() => {
+          this.name.set(data.name);
+          this.description.set(data.description ?? '');
+          this.collectionMode.set(data.mode);
+          this.recordingStrategy.set(data.recordingStrategy);
+          this.isActive.set(data.isActive);
+          this.populated = true;
+        });
       }
     });
   }
@@ -158,7 +209,11 @@ export class CollectionPanelComponent extends BasePanelComponent {
     if (this.mode === 'create') return !!this.name();
     const data = this.dataQuery.data();
     if (!data) return false;
-    return this.name() !== data.name || this.description() !== (data.description ?? '');
+    return this.name()              !== data.name
+        || this.description()       !== (data.description ?? '')
+        || this.collectionMode()    !== data.mode
+        || this.recordingStrategy() !== data.recordingStrategy
+        || this.isActive()          !== data.isActive;
   }
 
   protected override validate(): boolean {
@@ -167,15 +222,51 @@ export class CollectionPanelComponent extends BasePanelComponent {
     return true;
   }
 
+  private autoSave(dto: UpdateCollectionDto): void {
+    if (!this.entityId) return;
+    this.updateMut.mutate({ id: this.entityId, dto });
+  }
+
+  protected onActiveToggle(): void {
+    const next = !this.isActive();
+    this.isActive.set(next);
+    this.autoSave({ isActive: next });
+  }
+
+  protected onModeChange(mode: CollectionMode): void {
+    this.collectionMode.set(mode);
+    const strategy: RecordingStrategy = mode === 'local'
+      ? 'none'
+      : (this.recordingStrategy() === 'none' ? 'all' : this.recordingStrategy());
+    this.recordingStrategy.set(strategy);
+    this.autoSave({ mode, recordingStrategy: strategy });
+  }
+
+  protected onStrategyChange(value: RecordingStrategy): void {
+    this.recordingStrategy.set(value);
+    this.autoSave({ recordingStrategy: value });
+  }
+
+  protected onNameBlur(): void {
+    if (!this.name().trim()) { this.nameError.set('Name is required'); return; }
+    this.nameError.set('');
+    this.autoSave({ name: this.name(), description: this.description() || undefined });
+  }
+
+  protected onDescriptionBlur(): void {
+    this.autoSave({ description: this.description() || undefined });
+  }
+
   protected override async doSave(): Promise<void> {
     if (this.entityId) {
       await this.updateMut.mutateAsync({
         id: this.entityId,
         dto: {
-          name:        this.name(),
-          description: this.description() || undefined,
-          mode:        this.collectionMode(),
-          isActive:    this.isActive(),
+          name:              this.name(),
+          description:       this.description() || undefined,
+          mode:              this.collectionMode(),
+          recordingStrategy: this.recordingStrategy(),
+          isActive:          this.isActive(),
         },
       });
     } else {
@@ -186,7 +277,7 @@ export class CollectionPanelComponent extends BasePanelComponent {
         mode:              this.collectionMode(),
         isActive:          this.isActive(),
         isFavorite:        false,
-        recordingStrategy: 'none',
+        recordingStrategy: this.recordingStrategy(),
       });
       this.createdId = created.id;
     }

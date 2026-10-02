@@ -5,6 +5,8 @@ import {
   inject,
   input,
   model,
+  signal,
+  untracked,
 } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { NavigationEnd, Router, RouterOutlet } from '@angular/router';
@@ -16,6 +18,7 @@ import {
   SidebarComponent,
 } from '@mockoto-ui/design-system';
 import { queryViewStatus } from '@mockoto-ui/core';
+import type { Collection } from '@mockoto/shared';
 import { CollectionsService } from '../collections.service';
 import { CollectionItemComponent } from '../collection-item/collection-item.component';
 
@@ -73,20 +76,86 @@ import { CollectionItemComponent } from '../collection-item/collection-item.comp
             </mk-button>
           </div>
         } @else {
-          @for (col of collectionsQuery.data() ?? []; track col.id) {
-            <mk-collection-item
-              [collection]="col"
-              [active]="activeId() === col.id"
-              [collapsed]="collapsed()"
-              [updating]="updateMut.isPending()"
-              [deleting]="deleteMut.isPending()"
-              (navigated)="navigateTo(col.id)"
-              (editClicked)="editCollection(col.id)"
-              (deleteClicked)="deleteCollection(col.id, col.isActive)"
-              (setActiveClicked)="setActive(col.id)"
-              (toggleFavoriteClicked)="toggleFavorite(col.id, col.isFavorite)"
-            />
+
+          <!-- ── Favorites group ─────────────────────── -->
+          @if (favorites().length > 0) {
+            @if (!collapsed()) {
+              <button
+                type="button"
+                (click)="favoritesCollapsed.set(!favoritesCollapsed())"
+                class="flex w-full items-center gap-1 px-3 pb-0.5 pt-1 text-[10px] font-semibold uppercase tracking-widest text-amber-500/80 transition-colors hover:text-amber-500 dark:text-amber-500/60 dark:hover:text-amber-400"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" width="9" height="9" viewBox="0 0 24 24"
+                     fill="currentColor" stroke="currentColor" stroke-width="2"
+                     stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+                </svg>
+                Favorites
+                <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24"
+                     fill="none" stroke="currentColor" stroke-width="2.5"
+                     stroke-linecap="round" stroke-linejoin="round"
+                     class="ml-auto transition-transform"
+                     [class.rotate-180]="favoritesCollapsed()" aria-hidden="true">
+                  <polyline points="6 9 12 15 18 9"/>
+                </svg>
+              </button>
+            }
+            @if (collapsed() || !favoritesCollapsed()) {
+              @for (col of favorites(); track col.id) {
+                <mk-collection-item
+                  [collection]="col"
+                  [active]="activeId() === col.id"
+                  [collapsed]="collapsed()"
+                  [updating]="updateMut.isPending()"
+                  [deleting]="deleteMut.isPending()"
+                  (navigated)="navigateTo(col.id)"
+                  (editClicked)="editCollection(col.id)"
+                  (deleteClicked)="deleteCollection(col.id, col.isActive)"
+                  (setActiveClicked)="setActive(col.id)"
+                  (toggleFavoriteClicked)="toggleFavorite(col.id, col.isFavorite)"
+                  (modeCycleClicked)="cycleMode(col.id, $event)"
+                  (recordingStrategyCycled)="cycleRecordingStrategy(col.id, $event)"
+                />
+              }
+            }
           }
+
+          <!-- ── All collections group ───────────────── -->
+          @if (!collapsed() && favorites().length > 0) {
+            <button
+              type="button"
+              (click)="allCollapsed.set(!allCollapsed())"
+              class="flex w-full items-center gap-1 px-3 pb-0.5 pt-2 text-[10px] font-semibold uppercase tracking-widest text-gray-400 transition-colors hover:text-gray-500 dark:text-zinc-600 dark:hover:text-zinc-400"
+            >
+              All
+              <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24"
+                   fill="none" stroke="currentColor" stroke-width="2.5"
+                   stroke-linecap="round" stroke-linejoin="round"
+                   class="ml-auto transition-transform"
+                   [class.rotate-180]="allCollapsed()" aria-hidden="true">
+                <polyline points="6 9 12 15 18 9"/>
+              </svg>
+            </button>
+          }
+          @if (collapsed() || !allCollapsed()) {
+            @for (col of others(); track col.id) {
+              <mk-collection-item
+                [collection]="col"
+                [active]="activeId() === col.id"
+                [collapsed]="collapsed()"
+                [updating]="updateMut.isPending()"
+                [deleting]="deleteMut.isPending()"
+                (navigated)="navigateTo(col.id)"
+                (editClicked)="editCollection(col.id)"
+                (deleteClicked)="deleteCollection(col.id, col.isActive)"
+                (setActiveClicked)="setActive(col.id)"
+                (toggleFavoriteClicked)="toggleFavorite(col.id, col.isFavorite)"
+                (modeCycleClicked)="cycleMode(col.id, $event)"
+                (recordingStrategyCycled)="cycleRecordingStrategy(col.id, $event)"
+              />
+            }
+          }
+
         }
       </ng-container>
 
@@ -160,12 +229,23 @@ export class ProjectLayoutComponent {
     { w: '70%' }, { w: '52%' }, { w: '83%' }, { w: '64%' }, { w: '76%' },
   ];
 
+  protected readonly favoritesCollapsed = signal(false);
+  protected readonly allCollapsed       = signal(false);
+
   protected readonly sidebarStatus = computed(() =>
     queryViewStatus(this.collectionsQuery),
   );
 
   protected readonly noCollections = computed(() =>
     this.sidebarStatus() === 'ready' && (this.collectionsQuery.data()?.length ?? 0) === 0,
+  );
+
+  protected readonly favorites = computed(() =>
+    (this.collectionsQuery.data() ?? []).filter(c => c.isFavorite),
+  );
+
+  protected readonly others = computed(() =>
+    (this.collectionsQuery.data() ?? []).filter(c => !c.isFavorite),
   );
 
   private readonly currentUrl = toSignal(
@@ -185,12 +265,25 @@ export class ProjectLayoutComponent {
     // Auto-select the active collection (or first) when no collection is in the URL.
     effect(() => {
       const collections = this.collectionsQuery.data();
+      const projectId   = this.projectId();
       if (!collections?.length || this.activeId()) return;
       const target = collections.find(c => c.isActive) ?? collections[0];
-      this.router.navigate(
-        ['/projects', this.projectId(), 'collections', target.id, 'rules'],
-        { replaceUrl: true },
+      untracked(() =>
+        this.router.navigate(
+          ['/projects', projectId, 'collections', target.id, 'rules'],
+          { replaceUrl: true },
+        )
       );
+    });
+
+    // Reset group collapse when switching to icon mode — user can't re-expand otherwise.
+    effect(() => {
+      if (this.collapsed()) {
+        untracked(() => {
+          this.favoritesCollapsed.set(false);
+          this.allCollapsed.set(false);
+        });
+      }
     });
   }
 
@@ -210,6 +303,14 @@ export class ProjectLayoutComponent {
 
   protected toggleFavorite(collectionId: string, current: boolean): void {
     this.updateMut.mutate({ id: collectionId, dto: { isFavorite: !current } });
+  }
+
+  protected cycleMode(collectionId: string, dto: { mode: Collection['mode']; recordingStrategy: Collection['recordingStrategy'] }): void {
+    this.updateMut.mutate({ id: collectionId, dto });
+  }
+
+  protected cycleRecordingStrategy(collectionId: string, recordingStrategy: Collection['recordingStrategy']): void {
+    this.updateMut.mutate({ id: collectionId, dto: { recordingStrategy } });
   }
 
   protected setActive(collectionId: string): void {

@@ -1,16 +1,7 @@
 import { ChangeDetectionStrategy, Component, computed, input, output } from '@angular/core';
 import { NgClass } from '@angular/common';
 import type { Rule } from '@mockoto/shared';
-
-const METHOD_COLOR: Record<string, string> = {
-  GET:     'bg-emerald-50  text-emerald-600  dark:bg-emerald-500/10  dark:text-emerald-400',
-  POST:    'bg-blue-50     text-blue-600     dark:bg-blue-500/10     dark:text-blue-400',
-  PUT:     'bg-amber-50    text-amber-600    dark:bg-amber-500/10    dark:text-amber-400',
-  PATCH:   'bg-orange-50   text-orange-600   dark:bg-orange-500/10   dark:text-orange-400',
-  DELETE:  'bg-red-50      text-red-600      dark:bg-red-500/10      dark:text-red-400',
-  HEAD:    'bg-violet-50   text-violet-600   dark:bg-violet-500/10   dark:text-violet-400',
-  OPTIONS: 'bg-zinc-100    text-zinc-600     dark:bg-zinc-800        dark:text-zinc-400',
-};
+import { METHOD_COLOR } from '../method-colors';
 
 const PASSTHROUGH_ON  = 'bg-violet-50 text-violet-600 dark:bg-violet-500/10 dark:text-violet-400';
 const PASSTHROUGH_OFF = 'bg-gray-100 text-gray-600 dark:bg-zinc-800 dark:text-zinc-400';
@@ -54,13 +45,13 @@ const PASSTHROUGH_OFF = 'bg-gray-100 text-gray-600 dark:bg-zinc-800 dark:text-zi
 
     <!-- URL + description -->
     <td class="px-3 py-2.5">
-      <span class="block font-mono text-sm leading-snug text-gray-800 dark:text-zinc-200">{{ rule().url }}</span>
+      <span class="block truncate font-mono text-sm leading-snug text-gray-800 dark:text-zinc-200" [title]="rule().url">{{ rule().url }}</span>
       @if (rule().description) {
-        <span class="mt-0.5 block truncate text-xs text-gray-400 dark:text-zinc-600">{{ rule().description }}</span>
+        <span class="mt-0.5 block truncate text-xs text-gray-400 dark:text-zinc-600" [title]="rule().description">{{ rule().description }}</span>
       }
     </td>
 
-    <!-- Type (passthrough / mock) -->
+    <!-- Type (passthrough / response) -->
     <td class="w-[80px] px-3 py-2.5">
       <span
         class="inline-flex items-center gap-1 rounded px-1.5 py-0.5 text-xs font-medium"
@@ -77,7 +68,7 @@ const PASSTHROUGH_OFF = 'bg-gray-100 text-gray-600 dark:bg-zinc-800 dark:text-zi
                fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
             <rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/>
           </svg>
-          Mock
+          Response
         }
       </span>
     </td>

@@ -9,7 +9,6 @@ import {
   signal,
   untracked,
 } from '@angular/core';
-import { NgClass } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ButtonComponent, CodeEditorComponent, InputComponent } from '@mockoto-ui/design-system';
 import { ShortcutAware } from '@mockoto-ui/core';
@@ -26,19 +25,18 @@ interface ShortcutItem<T> {
 @Component({
   selector: 'mk-response-inline-form',
   standalone: true,
-  imports: [NgClass, FormsModule, ButtonComponent, InputComponent, CodeEditorComponent],
+  imports: [FormsModule, ButtonComponent, InputComponent, CodeEditorComponent],
   host: { '[class]': 'hostClass()' },
   template: `
-    <!-- Toolbar -->
-    <div class="flex shrink-0 items-end gap-4 border-b border-gray-100 px-4 py-3 dark:border-border">
-
-      <!-- Favorite star -->
+    <!-- Toolbar: star + name -->
+    <div class="flex shrink-0 items-center gap-2 border-b border-gray-100 px-4 py-2 dark:border-border">
       <button
         type="button"
         (click)="toggleFavorite()"
         [disabled]="mode() === 'create'"
         [title]="isFavorite() ? 'Remove from favorites' : 'Add to favorites'"
-        class="mb-0.5 flex h-6 w-6 shrink-0 self-start items-center justify-center rounded transition-colors disabled:hidden"
+        [attr.aria-label]="isFavorite() ? 'Remove from favorites' : 'Add to favorites'"
+        class="flex h-6 w-6 shrink-0 items-center justify-center rounded transition-colors disabled:hidden"
         [class]="isFavorite()
           ? 'text-amber-400 hover:text-amber-500'
           : 'text-gray-300 hover:text-amber-300 dark:text-zinc-600 dark:hover:text-amber-400'"
@@ -49,64 +47,59 @@ interface ShortcutItem<T> {
           <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
         </svg>
       </button>
+      <mk-input class="flex-1" [(value)]="name" placeholder="Response name" />
+    </div>
 
-      <!-- Name -->
-      <div class="w-52 shrink-0">
-        <mk-input label="Name" [(value)]="name" placeholder="Response name" />
+    <!-- Controls bar: Status + Delay — full-width, never clipped by split resize -->
+    <div class="flex shrink-0 items-center gap-3 border-b border-gray-100 bg-gray-50/60 px-4 py-2 dark:border-border dark:bg-white/2">
+
+      <!-- Status -->
+      <div class="flex items-center gap-2">
+        <span class="text-xs text-gray-400 dark:text-zinc-500">Status</span>
+        <input
+          type="number"
+          [value]="statusCode()"
+          (input)="onStatusInput($event)"
+          placeholder="200"
+          class="h-7 w-16 rounded-lg border bg-transparent px-2 text-center font-mono text-xs text-gray-800 outline-none transition-colors placeholder:text-gray-300 focus:ring-1 dark:text-zinc-200 dark:placeholder:text-zinc-600"
+          [class]="statusInputClasses()"
+        />
+        <div class="flex overflow-hidden rounded-lg border border-gray-200 dark:border-zinc-700">
+          @for (item of statusShortcutItems(); track item.value) {
+            <button type="button" (click)="setStatusShortcut(item.value)"
+              class="px-2 py-1 text-xs font-mono font-semibold transition-colors"
+              [class.border-r]="!$last"
+              [class.border-gray-200]="!$last"
+              [class.dark:border-zinc-700]="!$last"
+              [class]="item.classes"
+            >{{ item.label }}</button>
+          }
+        </div>
       </div>
 
-      <!-- Status + Latency stacked -->
-      <div class="flex shrink-0 flex-col gap-1.5 pb-0.5">
+      <div class="h-4 w-px bg-gray-200 dark:bg-zinc-700"></div>
 
-        <!-- Status -->
-        <div class="flex items-center gap-2">
-          <span class="w-10 shrink-0 text-right text-xs font-medium text-gray-400 dark:text-zinc-600">Status</span>
-          <input
-            type="number"
-            [value]="statusCode()"
-            (input)="onStatusInput($any($event.target).value)"
-            placeholder="200"
-            class="h-7 w-[72px] shrink-0 rounded-lg border bg-transparent px-2 text-center font-mono text-xs text-gray-800 outline-none transition-colors placeholder:text-gray-300 focus:ring-1 dark:text-zinc-200 dark:placeholder:text-zinc-600"
-            [ngClass]="statusInputClasses()"
-          />
-          <div class="flex overflow-hidden rounded-lg border border-gray-200 dark:border-zinc-700">
-            @for (item of statusShortcutItems(); track item.value) {
-              <button type="button" (click)="setStatusShortcut(item.value)"
-                class="px-2.5 py-1 text-xs font-mono font-semibold transition-colors"
-                [class.border-r]="!$last"
-                [class.border-gray-200]="!$last"
-                [class.dark:border-zinc-700]="!$last"
-                [ngClass]="item.classes"
-              >{{ item.label }}</button>
-            }
-          </div>
+      <!-- Delay -->
+      <div class="flex items-center gap-2">
+        <span class="text-xs text-gray-400 dark:text-zinc-500">Delay</span>
+        <input
+          type="number" step="1" min="0"
+          [value]="latency()"
+          (input)="onLatencyInput($event)"
+          placeholder="0"
+          class="h-7 w-14 rounded-lg border border-gray-200 bg-transparent px-2 text-center font-mono text-xs text-gray-800 outline-none transition-colors placeholder:text-gray-300 focus:border-violet-400 focus:ring-1 focus:ring-violet-400/20 dark:border-zinc-700 dark:text-zinc-200 dark:placeholder:text-zinc-600 dark:focus:border-violet-500"
+        />
+        <div class="flex overflow-hidden rounded-lg border border-gray-200 dark:border-zinc-700">
+          @for (item of latencyShortcutItems(); track item.value) {
+            <button type="button" (click)="setLatencyShortcut(item.value)"
+              class="px-2 py-1 text-xs font-mono font-semibold transition-colors"
+              [class.border-r]="!$last"
+              [class.border-gray-200]="!$last"
+              [class.dark:border-zinc-700]="!$last"
+              [class]="item.classes"
+            >{{ item.label }}</button>
+          }
         </div>
-
-        <!-- Latency -->
-        <div class="flex items-center gap-2">
-          <span class="w-10 shrink-0 text-right text-xs font-medium text-gray-400 dark:text-zinc-600">Delay</span>
-          <input
-            type="number"
-            step="1"
-            min="0"
-            [value]="latency()"
-            (input)="onLatencyInput($any($event.target).value)"
-            placeholder="0"
-            class="h-7 w-[64px] shrink-0 rounded-lg border border-gray-200 bg-transparent px-2 text-center font-mono text-xs text-gray-800 outline-none transition-colors placeholder:text-gray-300 focus:border-violet-400 focus:ring-1 focus:ring-violet-400/20 dark:border-zinc-700 dark:text-zinc-200 dark:placeholder:text-zinc-600 dark:focus:border-violet-500"
-          />
-          <div class="flex overflow-hidden rounded-lg border border-gray-200 dark:border-zinc-700">
-            @for (item of latencyShortcutItems(); track item.value) {
-              <button type="button" (click)="setLatencyShortcut(item.value)"
-                class="px-2.5 py-1 text-xs font-mono font-semibold transition-colors"
-                [class.border-r]="!$last"
-                [class.border-gray-200]="!$last"
-                [class.dark:border-zinc-700]="!$last"
-                [ngClass]="item.classes"
-              >{{ item.label }}</button>
-            }
-          </div>
-        </div>
-
       </div>
 
     </div>
@@ -144,53 +137,44 @@ interface ShortcutItem<T> {
 
     </div>
 
-    <!-- Footer -->
-    <div class="flex shrink-0 items-center justify-end gap-1.5 border-t border-gray-100 px-4 py-2 dark:border-border">
+    <!-- Footer: delete + save -->
+    <div class="flex shrink-0 items-center border-t border-gray-100 px-4 py-2 dark:border-border">
+
       @if (mode() === 'edit') {
         @if (deleteConfirming()) {
-          <!-- Inline confirmation -->
-          <span class="mr-auto text-xs text-gray-500 dark:text-zinc-400">Delete this response?</span>
-          <mk-button variant="secondary" size="sm" type="button" (click)="deleteConfirming.set(false)">Cancel</mk-button>
-          <mk-button variant="danger" size="sm" type="button" (click)="delete()">Confirm delete</mk-button>
+          <span class="text-xs text-gray-500 dark:text-zinc-400">Delete this response?</span>
+          <mk-button variant="secondary" size="sm" type="button" (click)="deleteConfirming.set(false)" class="ml-2">Cancel</mk-button>
+          <mk-button variant="danger" size="sm" type="button" (click)="delete()" class="ml-1.5">Delete</mk-button>
         } @else {
-          <mk-button variant="danger" size="sm" type="button" (click)="deleteConfirming.set(true)" class="mr-auto">
-            <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <button
+            type="button"
+            (click)="deleteConfirming.set(true)"
+            title="Delete response"
+            class="flex h-7 items-center gap-1.5 rounded px-2 text-xs text-gray-400 transition-colors hover:bg-red-50 hover:text-red-500 dark:text-zinc-500 dark:hover:bg-red-500/10 dark:hover:text-red-400"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
               <polyline points="3 6 5 6 21 6"/>
               <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/>
             </svg>
             Delete
-          </mk-button>
-          <mk-button size="sm" type="button" (click)="save()" [disabled]="saving()">
-            @if (saving()) {
-              <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="animate-spin">
-                <path d="M21 12a9 9 0 1 1-6.219-8.56"/>
-              </svg>
-            } @else {
-              <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/>
-                <polyline points="17 21 17 13 7 13 7 21"/>
-                <polyline points="7 3 7 8 15 8"/>
-              </svg>
-            }
-            {{ saving() ? 'Saving…' : 'Save' }}
-          </mk-button>
+          </button>
         }
-      } @else {
-        <mk-button size="sm" type="button" (click)="save()" [disabled]="saving()">
-          @if (saving()) {
-            <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="animate-spin">
-              <path d="M21 12a9 9 0 1 1-6.219-8.56"/>
-            </svg>
-          } @else {
-            <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/>
-              <polyline points="17 21 17 13 7 13 7 21"/>
-              <polyline points="7 3 7 8 15 8"/>
-            </svg>
-          }
-          {{ saving() ? 'Saving…' : 'Save' }}
-        </mk-button>
       }
+
+      <mk-button class="ml-auto" size="sm" type="button" (click)="save()" [disabled]="saving()">
+        @if (saving()) {
+          <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="animate-spin">
+            <path d="M21 12a9 9 0 1 1-6.219-8.56"/>
+          </svg>
+        } @else {
+          <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/>
+            <polyline points="17 21 17 13 7 13 7 21"/>
+            <polyline points="7 3 7 8 15 8"/>
+          </svg>
+        }
+        {{ saving() ? 'Saving…' : 'Save' }}
+      </mk-button>
     </div>
   `,
 })
@@ -227,7 +211,7 @@ export class ResponseInlineFormComponent extends ShortcutAware {
   protected readonly statusCode = linkedSignal<string>(() => { this.id(); return '200'; });
   protected readonly latency    = linkedSignal<string>(() => { this.id(); return ''; });
   protected readonly body       = linkedSignal<string>(() => { this.id(); return ''; });
-  protected readonly payload    = linkedSignal<string>(() => this.requestBodyJson());
+  protected readonly payload    = linkedSignal<string>(() => { this.id(); return untracked(() => this.requestBodyJson()); });
   protected readonly isActive   = linkedSignal<boolean>(() => { this.id(); return false; });
   protected readonly isFavorite = linkedSignal<boolean>(() => { this.id(); return false; });
 
@@ -318,14 +302,13 @@ export class ResponseInlineFormComponent extends ShortcutAware {
     catch { return { value: null, error: 'Invalid JSON' }; }
   }
 
-  protected onStatusInput(value: string): void {
-    this.statusCode.set(value);
+  protected onStatusInput(e: Event): void {
+    this.statusCode.set((e.target as HTMLInputElement).value);
     this.statusCodeError.set('');
   }
 
-  protected onLatencyInput(value: string): void {
-    const n = parseInt(value, 10);
-    this.latency.set(isNaN(n) ? '0' : String(Math.max(0, n)));
+  protected onLatencyInput(e: Event): void {
+    this.latency.set((e.target as HTMLInputElement).value);
   }
 
   protected async setStatusShortcut(code: number): Promise<void> {
@@ -402,10 +385,6 @@ export class ResponseInlineFormComponent extends ShortcutAware {
   protected delete(): void {
     const currentId = this.id();
     if (!currentId) return;
-    if (!this.deleteConfirming()) {
-      this.deleteConfirming.set(true);
-      return;
-    }
     this.deleteConfirming.set(false);
     this.deleteRequested.emit(currentId);
   }

@@ -1,28 +1,19 @@
-import { ChangeDetectionStrategy, Component, computed, input, output } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, HostListener, input, output, signal } from '@angular/core';
 import { NgClass } from '@angular/common';
 import { ButtonComponent } from '@mockoto-ui/design-system';
 import { ResponseInlineFormComponent, ResponseTabComponent } from '@mockoto-ui/features/responses';
 import type { Rule, RuleResponse } from '@mockoto/shared';
-
-const METHOD_COLOR: Record<string, string> = {
-  GET:     'bg-emerald-50  text-emerald-600  dark:bg-emerald-500/10  dark:text-emerald-400',
-  POST:    'bg-blue-50     text-blue-600     dark:bg-blue-500/10     dark:text-blue-400',
-  PUT:     'bg-amber-50    text-amber-600    dark:bg-amber-500/10    dark:text-amber-400',
-  PATCH:   'bg-orange-50   text-orange-600   dark:bg-orange-500/10   dark:text-orange-400',
-  DELETE:  'bg-red-50      text-red-600      dark:bg-red-500/10      dark:text-red-400',
-  HEAD:    'bg-violet-50   text-violet-600   dark:bg-violet-500/10   dark:text-violet-400',
-  OPTIONS: 'bg-zinc-100    text-zinc-600     dark:bg-zinc-800        dark:text-zinc-400',
-};
+import { METHOD_COLOR } from '../method-colors';
 
 @Component({
   selector: 'mk-response-editor',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [NgClass, ButtonComponent, ResponseTabComponent, ResponseInlineFormComponent],
-  host: { class: 'flex min-h-0 flex-1 flex-col overflow-hidden' },
+  host: { '[class]': 'hostClass()' },
   template: `
     <!-- Rule header -->
-    <div class="flex shrink-0 items-center gap-2 border-b border-gray-100 bg-gray-50/60 px-4 py-3 dark:border-border dark:bg-white/[0.02]">
+    <div class="flex shrink-0 items-center gap-2 border-b border-gray-100 bg-gray-50/60 px-4 py-3 dark:border-border dark:bg-white/2">
       <span
         class="inline-flex h-[18px] shrink-0 items-center rounded px-1.5 font-mono text-xs font-bold tracking-wide"
         [ngClass]="methodClasses()"
@@ -41,6 +32,28 @@ const METHOD_COLOR: Record<string, string> = {
           <polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/>
         </svg>
       </button>
+      <button
+        type="button"
+        (click)="fullscreen.set(!fullscreen())"
+        [title]="fullscreen() ? 'Exit fullscreen (Esc)' : 'Fullscreen'"
+        [attr.aria-label]="fullscreen() ? 'Exit fullscreen' : 'Expand to fullscreen'"
+        [attr.aria-pressed]="fullscreen()"
+        class="flex h-7 w-7 items-center justify-center rounded text-gray-400 transition-colors hover:text-indigo-500 dark:text-zinc-500 dark:hover:text-indigo-400"
+      >
+        @if (fullscreen()) {
+          <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24"
+               fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M8 3v3a2 2 0 0 1-2 2H3"/><path d="M21 8h-3a2 2 0 0 1-2-2V3"/>
+            <path d="M3 16h3a2 2 0 0 1 2 2v3"/><path d="M16 21v-3a2 2 0 0 1 2-2h3"/>
+          </svg>
+        } @else {
+          <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24"
+               fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M3 8V5a2 2 0 0 1 2-2h3"/><path d="M16 3h3a2 2 0 0 1 2 2v3"/>
+            <path d="M21 16v3a2 2 0 0 1-2 2h-3"/><path d="M8 21H5a2 2 0 0 1-2-2v-3"/>
+          </svg>
+        }
+      </button>
       <mk-button size="sm" (click)="newResponseClicked.emit()">New Response</mk-button>
     </div>
 
@@ -51,7 +64,7 @@ const METHOD_COLOR: Record<string, string> = {
         <div class="h-7 w-20 animate-pulse rounded-md bg-gray-100 dark:bg-white/5"></div>
       </div>
     } @else if (showTabs()) {
-      <div class="flex shrink-0 flex-wrap items-center gap-2 overflow-y-auto border-b border-gray-100 px-3 py-3 dark:border-border" style="max-height: 120px">
+      <div class="flex max-h-[120px] shrink-0 flex-wrap items-center gap-2 overflow-y-auto border-b border-gray-100 px-3 py-3 dark:border-border">
         @for (resp of responses(); track resp.id) {
           <mk-response-tab
             [response]="resp"
@@ -120,6 +133,14 @@ export class ResponseEditorComponent {
   readonly payloadSave             = output<unknown>();
   readonly deleteRequested         = output<string>();
 
+  protected readonly fullscreen = signal(false);
+
+  protected readonly hostClass = computed(() =>
+    this.fullscreen()
+      ? 'fixed inset-0 z-[9999] flex flex-col overflow-hidden bg-white dark:bg-surface'
+      : 'flex min-h-0 flex-1 flex-col overflow-hidden'
+  );
+
   protected readonly methodClasses = computed<string>(() =>
     METHOD_COLOR[this.rule().requestMethod] ?? 'bg-zinc-100 text-zinc-600 dark:bg-zinc-800 dark:text-zinc-400'
   );
@@ -127,4 +148,12 @@ export class ResponseEditorComponent {
   protected readonly showTabs = computed<boolean>(() =>
     this.responses().length > 0 || this.editingResponseId() === 'new'
   );
+
+  @HostListener('document:keydown', ['$event'])
+  protected onKeydown(e: KeyboardEvent): void {
+    if (e.key === 'Escape' && this.fullscreen()) {
+      e.stopImmediatePropagation();
+      this.fullscreen.set(false);
+    }
+  }
 }

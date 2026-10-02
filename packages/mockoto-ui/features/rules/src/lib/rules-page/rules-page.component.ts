@@ -36,7 +36,7 @@ const SPLIT_PRESETS: readonly SplitPreset[] = [
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [RouterOutlet, RuleListComponent, ResponseEditorComponent, NotFoundStateComponent, ErrorStateComponent, ButtonComponent, LoadingSkeletonComponent, SplitHandleComponent],
-  host: { class: 'flex h-full min-h-0' },
+  host: { '[class]': 'hostClass()' },
   template: `
     @switch (workspaceStatus()) {
       @case ('loading') {
@@ -83,6 +83,19 @@ const SPLIT_PRESETS: readonly SplitPreset[] = [
           [error]="rulesQuery.isError()"
           [selectedRuleId]="selectedRuleId()"
           [collectionName]="collectionName()"
+          [collectionMode]="collectionMode()"
+          [collectionIsFavorite]="collectionIsFavorite()"
+          [collectionIsActive]="collectionIsActive()"
+          [activeCollectionName]="activeCollectionName()"
+          [fullscreen]="fullscreen()"
+          [hasPrev]="canNavigateCollections()"
+          [hasNext]="canNavigateCollections()"
+          (activateCollectionClicked)="updateCollectionMut.mutate({ id: collectionId(), dto: { isActive: true } })"
+          (fullscreenToggled)="fullscreen.set(!fullscreen())"
+          (collectionFavoriteToggled)="updateCollectionMut.mutate({ id: collectionId(), dto: { isFavorite: !collectionIsFavorite() } })"
+          (collectionModeToggled)="updateCollectionMut.mutate({ id: collectionId(), dto: { mode: collectionMode() === 'proxy' ? 'local' : 'proxy' } })"
+          (prevClicked)="navigateCollection(-1)"
+          (nextClicked)="navigateCollection(1)"
           [updatePending]="updateMut.isPending()"
           [deletePending]="deleteMut.isPending()"
           (newRuleClicked)="openNew()"
@@ -147,8 +160,9 @@ export class RulesPageComponent {
   protected readonly containerEl = this.el.nativeElement;
   protected readonly splitPresets = SPLIT_PRESETS;
 
-  private readonly projectQuery    = this.projSvc.projectQuery(() => this.projectId());
+  private readonly projectQuery      = this.projSvc.projectQuery(() => this.projectId());
   protected readonly collectionQuery = this.colSvc.collectionQuery(() => this.collectionId());
+  private readonly collectionsQuery  = this.colSvc.collectionsQuery(() => this.projectId());
 
   protected readonly collectionReady = computed(
     () => queryViewStatus(this.collectionQuery) === 'ready',
@@ -160,11 +174,25 @@ export class RulesPageComponent {
   );
   protected readonly responsesQuery = this.responsesSvc.responsesQuery(() => this.selectedRuleId() ?? '');
 
-  protected readonly collectionName  = computed(() => this.collectionQuery.data()?.name ?? null);
+  protected readonly collectionName        = computed(() => this.collectionQuery.data()?.name ?? null);
+  protected readonly collectionMode        = computed(() => this.collectionQuery.data()?.mode ?? null);
+  protected readonly collectionIsFavorite  = computed(() => this.collectionQuery.data()?.isFavorite ?? false);
+  protected readonly collectionIsActive   = computed(() => {
+    const fromList = this.collectionsQuery.data()?.find(c => c.id === this.collectionId())?.isActive;
+    return fromList ?? this.collectionQuery.data()?.isActive ?? null;
+  });
+  protected readonly activeCollectionName = computed(() =>
+    this.collectionsQuery.data()?.find(c => c.isActive && c.id !== this.collectionId())?.name ?? null
+  );
   protected readonly selectedRuleId  = computed(() => this.rule() ?? null);
   protected readonly selectedRule    = computed(() =>
     this.rulesQuery.data()?.find(r => r.id === this.selectedRuleId()) ?? null
   );
+
+  private readonly collectionIndex = computed(() =>
+    (this.collectionsQuery.data() ?? []).findIndex(c => c.id === this.collectionId())
+  );
+  protected readonly canNavigateCollections = computed(() => (this.collectionsQuery.data() ?? []).length > 1);
 
   protected readonly workspaceStatus = computed(() => {
     const collectionStatus = queryViewStatus(this.collectionQuery);
@@ -186,8 +214,9 @@ export class RulesPageComponent {
     return rb != null ? JSON.stringify(rb, null, 2) : '';
   });
 
-  private readonly deletedIds        = linkedSignal<string[]>(() => { this.rule(); return []; });
+  private readonly deletedIds          = linkedSignal<string[]>(() => { this.rule(); return []; });
   protected readonly editingResponseId = linkedSignal<string | null>(() => { this.rule(); return null; });
+  private readonly autoSelectedOnce    = linkedSignal<boolean>(() => { this.collectionId(); return untracked(() => !!this.selectedRuleId()); });
 
   protected readonly visibleResponses = computed(() =>
     (this.responsesQuery.data() ?? []).filter(r => !this.deletedIds().includes(r.id))
@@ -200,12 +229,20 @@ export class RulesPageComponent {
     return (available.find(r => r.isActive) ?? available[0])?.id ?? null;
   });
 
-  protected readonly updateMut    = this.rulesSvc.updateMutation();
-  protected readonly deleteMut    = this.rulesSvc.deleteMutation();
+  protected readonly updateMut          = this.rulesSvc.updateMutation();
+  protected readonly deleteMut          = this.rulesSvc.deleteMutation();
+  protected readonly updateCollectionMut = this.colSvc.updateMutation();
   protected readonly setActiveMut = this.responsesSvc.setActiveMutation();
   private readonly deleteResponseMut = this.responsesSvc.deleteMutation();
 
-  protected readonly splitLeft = signal(33.33);
+  protected readonly splitLeft  = signal(33.33);
+  protected readonly fullscreen = signal(false);
+
+  protected readonly hostClass = computed(() =>
+    this.fullscreen()
+      ? 'fixed inset-0 z-[9999] flex bg-white dark:bg-surface'
+      : 'flex h-full min-h-0'
+  );
 
   constructor() {
     effect(() => {
@@ -215,6 +252,21 @@ export class RulesPageComponent {
         ...(projectName    ? { projectName }    : {}),
         ...(collectionName ? { collectionName } : {}),
       }));
+    });
+
+    effect(() => {
+      const rules = this.rulesQuery.data();
+      if (!rules || rules.length === 0 || this.selectedRuleId() || this.autoSelectedOnce()) return;
+      const first = rules[0];
+      untracked(() => {
+        this.autoSelectedOnce.set(true);
+        this.router.navigate([], {
+          relativeTo: this.route,
+          queryParams: { rule: first.id },
+          queryParamsHandling: 'merge',
+          replaceUrl: true,
+        });
+      });
     });
   }
 
@@ -227,7 +279,7 @@ export class RulesPageComponent {
   protected saveRulePayload(payload: unknown): void {
     const ruleId = this.selectedRuleId();
     if (!ruleId) return;
-    this.updateMut.mutate({ id: ruleId, dto: { requestBody: payload as never } });
+    this.updateMut.mutate({ id: ruleId, dto: { requestBody: payload as Record<string, unknown> } });
   }
 
   protected onDeleteRequested(id: string): void {
@@ -256,13 +308,13 @@ export class RulesPageComponent {
   }
 
   protected async confirmDelete(id: string): Promise<void> {
+    const wasSelected = this.selectedRuleId() === id;
     const confirmed = await this.dialogs.confirm({
       title: 'Delete this rule?',
       body: 'This will also delete all responses attached to this rule.',
       confirmLabel: 'Delete',
     });
     if (!confirmed) return;
-    const wasSelected = this.selectedRuleId() === id;
     await this.deleteMut.mutateAsync(id);
     if (wasSelected) {
       this.router.navigate([], {
@@ -274,12 +326,20 @@ export class RulesPageComponent {
   }
 
   protected selectRule(ruleId: string): void {
-    const current = this.selectedRuleId();
     this.router.navigate([], {
       relativeTo: this.route,
-      queryParams: { rule: current === ruleId ? null : ruleId },
+      queryParams: { rule: ruleId },
       queryParamsHandling: 'merge',
     });
+  }
+
+  protected navigateCollection(offset: 1 | -1): void {
+    const cols = this.collectionsQuery.data() ?? [];
+    if (cols.length < 2) return;
+    const idx = this.collectionIndex();
+    if (idx === -1) return;
+    const next = cols[(idx + offset + cols.length) % cols.length];
+    if (next) this.router.navigate(['/projects', this.projectId(), 'collections', next.id, 'rules'], { replaceUrl: true });
   }
 
   protected backToProject(): void {
@@ -303,6 +363,17 @@ export class RulesPageComponent {
 
   @HostListener('window:keydown', ['$event'])
   protected onKeydown(e: KeyboardEvent): void {
+    if (e.key === 'Escape' && this.fullscreen()) {
+      e.stopImmediatePropagation();
+      this.fullscreen.set(false);
+      return;
+    }
+    const tag = (e.target as HTMLElement).tagName.toLowerCase();
+    const isEditable = ['input', 'textarea', 'select'].includes(tag) || (e.target as HTMLElement).isContentEditable;
+    if (!isEditable) {
+      if (e.key === 'ArrowUp'   && this.canNavigateCollections()) { e.preventDefault(); this.navigateCollection(-1); return; }
+      if (e.key === 'ArrowDown' && this.canNavigateCollections()) { e.preventDefault(); this.navigateCollection(1);  return; }
+    }
     if (!e.altKey || !this.selectedRuleId()) return;
     const presets: Record<string, number> = { '2': 15, '3': 25, '4': 50, '5': 75 };
     const v = presets[e.key];

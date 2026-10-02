@@ -23,13 +23,13 @@ const LEVEL_CLASSES: Record<ToastLevel, string> = {
       role="region"
       aria-label="Notifications"
       aria-live="polite"
-      class="pointer-events-none fixed top-4 right-4 z-50 flex flex-col items-end gap-2"
+      class="pointer-events-none fixed top-4 right-4 z-10000 flex flex-col items-end gap-2"
     >
       @for (toast of toastService.toasts(); track toast.id) {
         <div
+          role="alert"
           class="toast-item pointer-events-auto flex w-80 max-w-sm items-start gap-3 rounded-lg border px-4 py-3 shadow-lg backdrop-blur-sm"
           [class]="levelClasses[toast.level]"
-          role="alert"
         >
           <span class="mt-0.5 shrink-0">
             @switch (toast.level) {
