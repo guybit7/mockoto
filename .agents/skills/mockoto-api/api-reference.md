@@ -95,6 +95,16 @@ Single call that replaces the 5-step Scenario 0 discovery flow:
 
 `headers` and `body` accept JSON **objects/arrays** (not pre-stringified strings — see [agent-toolkit.md](agent-toolkit.md)).
 
+**Non-JSON responses (text, XML, HTML, …):** set a `content-type` header and send `body` as a plain string. The proxy returns the string verbatim with that content type:
+
+```json
+{ "ruleId": "<uuid>", "isActive": true, "headers": { "content-type": "text/plain" }, "body": "OK" }
+```
+
+The content type is fixed when the response is created. A later `PUT`/`PATCH` whose `headers` change it (or omit a non-JSON one) returns `400`; send the same `content-type` again, or create a new response. `"body": null` clears the body.
+
+Without a `content-type` header (or with a JSON one) the response is served as `application/json`, and a string `body` is stored as a JSON string (`"OK"` with quotes).
+
 **Response body templating** — ⚠️ *disabled pending UI toggle per rule.* Infrastructure is implemented but not active. Do not use template variables in stored bodies — they will be returned literally.
 
 ## Agent playbooks

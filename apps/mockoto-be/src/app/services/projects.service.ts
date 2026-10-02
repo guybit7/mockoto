@@ -4,7 +4,7 @@ import { ProjectsRepository, ProjectRow } from '../repositories/projects.reposit
 import { CollectionsRepository } from '../repositories/collections.repository';
 import { RulesRepository } from '../repositories/rules.repository';
 import { RuleResponsesRepository } from '../repositories/rule-responses.repository';
-import { safeParseJson } from '../utils/json';
+import { safeParseJson, parseResponseBody } from '../utils/json';
 import { NotFoundError, ConflictError } from '../errors';
 
 export interface ManifestRuleEntry {
@@ -138,7 +138,7 @@ export class ProjectsService {
           ? {
               statusCode: active.statusCode,
               headers: safeParseJson(active.headers ?? undefined),
-              body: safeParseJson(active.body ?? undefined),
+              body: parseResponseBody(active.body, safeParseJson(active.headers ?? undefined)),
             }
           : null,
       };

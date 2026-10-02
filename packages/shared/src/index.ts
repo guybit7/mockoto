@@ -1,6 +1,7 @@
 export * from './lib/api-error';
 export * from './lib/base.entity';
 export * from './lib/validators';
+export * from './lib/content-type';
 export * from './lib/project.model';
 export * from './lib/collection.model';
 export * from './lib/rule.model';

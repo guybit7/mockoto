@@ -11,10 +11,28 @@ import {
 } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ButtonComponent, CodeEditorComponent, InputComponent } from '@mockoto-ui/design-system';
+import type { CodeLanguage } from '@mockoto-ui/design-system';
+import { DEFAULT_CONTENT_TYPE, getContentType, isJsonContentType } from '@mockoto/shared';
 import { ShortcutAware } from '@mockoto-ui/core';
 import { ResponsesService } from '../responses.service';
 
 const PAYLOAD_METHODS = new Set(['POST', 'PUT', 'DELETE', 'PATCH']);
+
+const CONTENT_TYPES: { value: string; label: string; language: CodeLanguage }[] = [
+  { value: DEFAULT_CONTENT_TYPE, label: 'JSON', language: 'json' },
+  { value: 'text/plain',         label: 'Text', language: 'plaintext' },
+  { value: 'application/xml',    label: 'XML',  language: 'xml' },
+  { value: 'text/html',          label: 'HTML', language: 'html' },
+];
+
+// Maps any content type (e.g. a recorded "text/xml; charset=utf-8") to an editor language.
+function languageFor(contentType: string): CodeLanguage {
+  if (isJsonContentType(contentType)) return 'json';
+  const mime = contentType.split(';')[0].toLowerCase();
+  if (mime.includes('html')) return 'html';
+  if (mime.includes('xml')) return 'xml';
+  return 'plaintext';
+}
 
 interface ShortcutItem<T> {
   value: T;
@@ -102,6 +120,27 @@ interface ShortcutItem<T> {
         </div>
       </div>
 
+      <div class="h-4 w-px bg-gray-200 dark:bg-zinc-700"></div>
+
+      <!-- Content type -->
+      <div class="flex items-center gap-2">
+        <span class="text-xs text-gray-400 dark:text-zinc-500">Type</span>
+        <div class="flex overflow-hidden rounded-lg border border-gray-200 dark:border-zinc-700"
+             [title]="mode() === 'edit' ? contentType() + ' — the type is set when the response is created' : contentType()">
+          @for (item of contentTypeItems(); track item.value) {
+            <button type="button" (click)="setContentType(item.value)"
+              [disabled]="mode() === 'edit'"
+              class="px-2 py-1 text-xs font-mono font-semibold transition-colors disabled:cursor-not-allowed"
+              [class.opacity-40]="mode() === 'edit' && bodyLanguage() !== item.language"
+              [class.border-r]="!$last"
+              [class.border-gray-200]="!$last"
+              [class.dark:border-zinc-700]="!$last"
+              [class]="item.classes"
+            >{{ item.label }}</button>
+          }
+        </div>
+      </div>
+
     </div>
 
     <!-- Editors -->
@@ -126,7 +165,7 @@ interface ShortcutItem<T> {
         <mk-code-editor
           class="flex-1 min-h-0"
           label="Response Body"
-          language="json"
+          [language]="bodyLanguage()"
           [height]="null"
           [error]="bodyError()"
           [value]="body()"
@@ -211,6 +250,7 @@ export class ResponseInlineFormComponent extends ShortcutAware {
   protected readonly statusCode = linkedSignal<string>(() => { this.id(); return '200'; });
   protected readonly latency    = linkedSignal<string>(() => { this.id(); return ''; });
   protected readonly body       = linkedSignal<string>(() => { this.id(); return ''; });
+  protected readonly contentType = linkedSignal<string>(() => { this.id(); return DEFAULT_CONTENT_TYPE; });
   protected readonly payload    = linkedSignal<string>(() => { this.id(); return untracked(() => this.requestBodyJson()); });
   protected readonly isActive   = linkedSignal<boolean>(() => { this.id(); return false; });
   protected readonly isFavorite = linkedSignal<boolean>(() => { this.id(); return false; });
@@ -246,6 +286,19 @@ export class ResponseInlineFormComponent extends ShortcutAware {
     }))
   );
 
+  protected readonly bodyLanguage = computed<CodeLanguage>(() => languageFor(this.contentType()));
+
+  protected readonly contentTypeItems = computed<(ShortcutItem<string> & { language: CodeLanguage })[]>(() =>
+    CONTENT_TYPES.map(type => ({
+      value: type.value,
+      label: type.label,
+      language: type.language,
+      classes: this.bodyLanguage() === type.language
+        ? 'bg-zinc-700 text-zinc-100 dark:bg-zinc-200 dark:text-zinc-900'
+        : 'bg-transparent text-gray-500 hover:bg-gray-100 hover:text-gray-700 dark:text-zinc-400 dark:hover:bg-zinc-800',
+    }))
+  );
+
   protected readonly statusInputClasses = computed<string>(() => {
     if (this.statusCodeError()) {
       return 'border-red-400 focus:ring-red-400/30 dark:border-red-500 dark:focus:ring-red-500/30';
@@ -273,7 +326,9 @@ export class ResponseInlineFormComponent extends ShortcutAware {
         this.name.set(data.name ?? '');
         this.statusCode.set(String(data.statusCode));
         this.latency.set(data.latency != null ? String(data.latency / 1000) : '');
-        this.body.set(data.body != null ? JSON.stringify(data.body, null, 2) : '');
+        const contentType = getContentType(data.headers) ?? DEFAULT_CONTENT_TYPE;
+        this.contentType.set(contentType);
+        this.body.set(this.formatBody(data.body, contentType));
         this.isActive.set(data.isActive);
         this.isFavorite.set(data.isFavorite);
       });
@@ -300,6 +355,32 @@ export class ResponseInlineFormComponent extends ShortcutAware {
     if (!trimmed) return { value: undefined, error: '' };
     try { return { value: JSON.parse(trimmed), error: '' }; }
     catch { return { value: null, error: 'Invalid JSON' }; }
+  }
+
+  // Non-JSON bodies are shown and saved as the raw text.
+  private formatBody(body: unknown, contentType: string): string {
+    if (body == null) return '';
+    if (typeof body === 'string' && !isJsonContentType(contentType)) return body;
+    return JSON.stringify(body, null, 2);
+  }
+
+  private parseBody(raw: string): { value: unknown; error: string } {
+    // An empty editor is sent as null so clearing the body is saved.
+    if (raw.trim() === '') return { value: null, error: '' };
+    if (isJsonContentType(this.contentType())) return this.parseJson(raw);
+    return { value: raw, error: '' };
+  }
+
+  // The content type is fixed at creation, so headers are only sent when creating.
+  private headersForCreate(): Record<string, unknown> | undefined {
+    if (this.contentType() === DEFAULT_CONTENT_TYPE) return undefined;
+    return { 'content-type': this.contentType() };
+  }
+
+  protected setContentType(contentType: string): void {
+    if (this.mode() === 'edit') return;
+    this.contentType.set(contentType);
+    this.bodyError.set('');
   }
 
   protected onStatusInput(e: Event): void {
@@ -332,7 +413,7 @@ export class ResponseInlineFormComponent extends ShortcutAware {
       return;
     }
 
-    const parsedBody = this.parseJson(this.body());
+    const parsedBody = this.parseBody(this.body());
     if (parsedBody.error) { this.bodyError.set(parsedBody.error); return; }
 
     let parsedPayload: { value: unknown; error: string } = { value: undefined, error: '' };
@@ -355,7 +436,7 @@ export class ResponseInlineFormComponent extends ShortcutAware {
             name:       this.name() || undefined,
             statusCode: code,
             latency,
-            body:       parsedBody.value as Record<string, unknown>,
+            body:       parsedBody.value,
             isActive:   this.isActive(),
             isFavorite: this.isFavorite(),
             isError:    code >= 400,
@@ -363,12 +444,14 @@ export class ResponseInlineFormComponent extends ShortcutAware {
         });
         savedId = currentId;
       } else {
+        const headers = this.headersForCreate();
         const created = await this.createMut.mutateAsync({
           ruleId:     this.ruleId(),
           name:       this.name() || undefined,
           statusCode: code,
           latency,
-          body:       parsedBody.value as Record<string, unknown>,
+          body:       parsedBody.value,
+          ...(headers && { headers }),
           isActive:   true,
           isFavorite: this.isFavorite(),
           isError:    code >= 400,

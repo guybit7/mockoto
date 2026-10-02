@@ -1,13 +1,14 @@
 import { randomUUID } from 'crypto';
-import { RuleResponse, CreateRuleResponseDto, UpdateRuleResponseDto } from '@mockoto/shared';
+import { RuleResponse, CreateRuleResponseDto, UpdateRuleResponseDto, contentTypeMime } from '@mockoto/shared';
 import { RuleResponsesRepository, RuleResponseRow } from '../repositories/rule-responses.repository';
-import { NotFoundError } from '../errors';
-import { safeParseJson, normalizeJson } from '../utils/json';
+import { NotFoundError, ValidationError } from '../errors';
+import { safeParseJson, normalizeJson, serializeResponseBody, parseResponseBody } from '../utils/json';
 
 export class RuleResponsesService {
   constructor(private readonly repository: RuleResponsesRepository) {}
 
   private toEntity(row: RuleResponseRow): RuleResponse {
+    const headers = safeParseJson(row.headers ?? undefined);
     return {
       id: row.id,
       ruleId: row.ruleId,
@@ -15,8 +16,8 @@ export class RuleResponsesService {
       isActive: row.isActive,
       isFavorite: row.isFavorite,
       statusCode: row.statusCode,
-      headers: safeParseJson(row.headers ?? undefined),
-      body: safeParseJson(row.body ?? undefined),
+      headers,
+      body: parseResponseBody(row.body, headers),
       isError: row.isError,
       latency: row.latency ?? undefined,
       createdAt: row.createdAt,
@@ -50,7 +51,7 @@ export class RuleResponsesService {
       isFavorite: data.isFavorite ?? false,
       statusCode: data.statusCode,
       headers: data.headers != null ? normalizeJson(data.headers) : null,
-      body: data.body != null ? normalizeJson(data.body) : null,
+      body: data.body != null ? serializeResponseBody(data.body, data.headers) : null,
       isError: data.isError ?? false,
       latency: data.latency ?? null,
       createdAt: now,
@@ -69,11 +70,25 @@ export class RuleResponsesService {
 
     const now = Math.floor(Date.now() / 1000);
     const { headers, body, isActive, ...rest } = data;
+    const currentHeaders = safeParseJson(current.headers);
+    // The content type decides how the body is stored, so it is fixed at creation.
+    if (headers !== undefined && contentTypeMime(headers) !== contentTypeMime(currentHeaders)) {
+      throw new ValidationError(
+        `The content type of a response cannot be changed after creation (it is "${contentTypeMime(currentHeaders)}"). ` +
+          'Keep the same content-type header, or create a new response.',
+      );
+    }
+    const effectiveHeaders = headers !== undefined ? headers : currentHeaders;
+    // body: null clears the stored body.
+    let nextBody: string | null | undefined;
+    if (body !== undefined) {
+      nextBody = body === null ? null : serializeResponseBody(body, effectiveHeaders);
+    }
     const patch = {
       ...rest,
       ...(isActive !== undefined && { isActive }),
       ...(headers !== undefined && { headers: normalizeJson(headers) }),
-      ...(body !== undefined && { body: normalizeJson(body) }),
+      ...(nextBody !== undefined && { body: nextBody }),
       updatedAt: now,
     };
 

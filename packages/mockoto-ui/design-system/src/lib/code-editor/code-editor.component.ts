@@ -10,11 +10,16 @@ import {
   signal,
   untracked,
 } from '@angular/core';
-import { isPlatformBrowser } from '@angular/common';
 import { EditorComponent } from 'ngx-monaco-editor-v2';
 import { ThemeService } from '@mockoto-ui/core';
 
-export type CodeLanguage = 'json' | 'javascript' | 'typescript' | 'plaintext';
+export type CodeLanguage =
+  | 'json'
+  | 'javascript'
+  | 'typescript'
+  | 'plaintext'
+  | 'xml'
+  | 'html';
 
 @Component({
   selector: 'mk-code-editor',
@@ -75,7 +80,7 @@ export class CodeEditorComponent implements OnDestroy {
   });
 
   private validationTimer: ReturnType<typeof setTimeout> | null = null;
-  private readonly platformId   = inject(PLATFORM_ID);
+  private readonly platformId = inject(PLATFORM_ID);
   private readonly themeService = inject(ThemeService);
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -87,7 +92,7 @@ export class CodeEditorComponent implements OnDestroy {
   private settingValue = false;
 
   private readonly monacoTheme = computed(() =>
-    this.themeService.theme() === 'dark' ? 'vs-dark' : 'vs'
+    this.themeService.theme() === 'dark' ? 'vs-dark' : 'vs',
   );
 
   // Computed so Monaco only receives a new options object when something actually changes.
@@ -122,6 +127,11 @@ export class CodeEditorComponent implements OnDestroy {
 
     effect(() => {
       if (this.error()) this.hasError.set(true);
+    });
+
+    // Only JSON is validated — drop a stale JSON error when the language changes.
+    effect(() => {
+      if (this.language() !== 'json') this.hasError.set(false);
     });
 
     // Monaco themes are global — updateOptions() does not propagate theme changes
